@@ -1,4 +1,4 @@
-from yaml import safe_load
+from yaml import safe_load, dump
 
 
 def load_config(config_file="config/config.yml"):
@@ -12,6 +12,8 @@ def load_config(config_file="config/config.yml"):
     mp_threshold = config.get("mp_threshold", 50)
     hp_pot_key = config.get("hp_pot_key", '1')
     mp_pot_key = config.get("mp_pot_key", '2')
+    hp_mp_check = config.get("hp_mp_check", False)
+    auto_attack_toggle = config.get("auto_attack_toggle", False)
     
     hp_bar_position = config.get("hp_bar_position", None)
     mp_bar_position = config.get("mp_bar_position", None)
@@ -29,6 +31,8 @@ def load_config(config_file="config/config.yml"):
         "mp_threshold": mp_threshold,
         "hp_pot_key": hp_pot_key,
         "mp_pot_key": mp_pot_key,
+        "hp_mp_check": hp_mp_check,
+        "auto_attack_toggle": auto_attack_toggle,
         "hp_bar_position": hp_bar_position,
         "mp_bar_position": mp_bar_position,
         "attack_settings": {
@@ -45,3 +49,8 @@ def load_skill_data(skill_file="config/skilldata_config.yml"):
         skill_data = safe_load(file)
     
     return skill_data
+
+
+def write_config_to_file(config, filename="config/config.yml"):
+    with open(filename, 'w') as file:
+        dump(config, file, default_flow_style=False)

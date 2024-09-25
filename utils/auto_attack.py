@@ -2,10 +2,10 @@ import pydirectinput
 import threading
 import time
 
+auto_attack = False
 
-def auto_attack_function():
-    global config
-    global auto_attack, attack_settings
+def auto_attack_function(config):
+    attack_settings = config.attack_settings
     while auto_attack:
         if config.target_window:
             config.target_window.activate()
@@ -35,23 +35,25 @@ def auto_attack_function():
                         time.sleep(0.1)
 
             # Increase delay between skill activations
-            time.sleep(1)  # Approximately 1 second delay
+            time.sleep(1)
         else:
             print("Target window not found.")
             break
 
 
-def start_auto_attack():
-    global auto_attack, attack_thread
-    if not auto_attack:
-        auto_attack = True
-        attack_thread = threading.Thread(target=auto_attack_function)
+def start_auto_attack(config):
+    if config.auto_attack:
+        attack_thread = threading.Thread(target=auto_attack_function, args=(config,))
         attack_thread.start()
         print("Auto-attack started.")
+        return attack_thread
+    else:
+        return None
 
 
-def stop_auto_attack():
+def stop_auto_attack(thread):
     global auto_attack
-    if auto_attack:
-        auto_attack = False
-        print("Auto-attack stopped.")
+    auto_attack = False
+    thread.join()
+    print("Auto-attack stopped.")
+    return None

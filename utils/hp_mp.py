@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import pydirectinput
 import time
+import threading
 
 from PIL import ImageGrab
 
@@ -66,3 +67,26 @@ def check_hp_mp(hp_threshold, mp_threshold, hp_bar_position, mp_bar_position, hp
             if mp_percentage <= mp_threshold:
                 use_potion(mp_pot_key)
         time.sleep(0.5)  # Reduced sleep time for faster response
+
+
+# Start HP/MP check thread
+def start_hp_mp_check(config):
+    if config.hp_mp_check:
+        hp_mp_thread = threading.Thread(
+            target=check_hp_mp,
+            args=(config.hp_threshold, config.mp_threshold, config.hp_bar_position, config.mp_bar_position, config.hp_pot_key, config.mp_pot_key, lambda: hp_mp_check)
+        )
+        hp_mp_thread.start()
+        print("HP/MP check started.")
+        return hp_mp_thread
+    else:
+        return None
+
+
+# Stop HP/MP check
+def stop_hp_mp_check(hp_mp_thread):
+    global hp_mp_check
+    hp_mp_thread.join()
+    hp_mp_check = False
+    print("HP/MP check stopped.")
+    return None

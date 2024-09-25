@@ -3,24 +3,18 @@ import os
 import pygetwindow as gw
 import time
 import tkinter as tk
-import threading
 import time
 
-from loader import load_config, load_skill_data
-from hp_mp_functions import check_hp_mp
+from loader import load_skill_data, write_config_to_file
+from utils.hp_mp import start_hp_mp_check, stop_hp_mp_check
+from auto_attack import start_auto_attack, stop_auto_attack
 
 #constants
 TARGET_WINDOW = None
 
-#init
-config = load_config()
-skill_data = load_skill_data()
-hp_mp_check = False
-auto_attack = False
-
 # GUI interface
-def create_gui():
-    global config, skill_data
+def create_gui(config):
+    skill_data = load_skill_data()
     window = tk.Tk()
     window.title("AutoXpSquire")
     window.geometry("700x1111")  # Expandable by dragging
@@ -42,13 +36,16 @@ def create_gui():
     window_name_entry.insert(0, config.window_name)
     # Auto-attack checkbox
     attack_var = tk.BooleanVar()
-    attack_checkbox = tk.Checkbutton(control_tab, text="Start Auto-Attack", variable=attack_var)
+    attack_checkbox = tk.Checkbutton(control_tab, text="Start Auto-Attack", variable=attack_var,
+                                     command=lambda: config_variable_setter(attack_var.get(), "auto_attack_toggle"))
     attack_checkbox.pack()
 
     # HP and MP check checkbox
     hp_mp_check_var = tk.BooleanVar()
-    hp_mp_checkbox = tk.Checkbutton(control_tab, text="Enable HP/MP Check", variable=hp_mp_check_var)
+    hp_mp_checkbox = tk.Checkbutton(control_tab, text="Enable HP/MP Check", variable=hp_mp_check_var,
+                                    command=lambda: config_variable_setter(hp_mp_check_var.get(), "hp_mp_check_var"))
     hp_mp_checkbox.pack()
+
 
     def start_bot():
         global TARGET_WINDOW
@@ -149,10 +146,12 @@ def create_gui():
             config.hp_pot_key = hp_pot_key_entry.get()
             config.mp_pot_key = mp_pot_key_entry.get()
             config.window_name = window_name_entry.get()
-
+            write_config_to_file(config)
             tk.messagebox.showinfo("Settings", "Settings saved successfully.")
         except ValueError:
             tk.messagebox.showerror("Error", "Threshold values must be numeric.")
+        except Exception as e:
+            print(f"Failed to save config settings: {e}")
 
 
     save_hp_mp_button = tk.Button(hp_mp_tab, text="Save Settings", command=save_settings)
@@ -191,10 +190,10 @@ def create_gui():
                 subclass_tab = tk.ttk.Frame(subclass_notebook)
                 subclass_notebook.add(subclass_tab, text=subclass)
 
-                skills = skill_data[selected][subclass]
+                config.skills = skill_data[selected][subclass]
 
                 # Skill selection
-                for skill_name in skills:
+                for skill_name in config.skills:
                     skill_frame = tk.Frame(subclass_tab)
                     skill_frame.pack(fill=tk.X, padx=5, pady=2)
 
@@ -333,6 +332,11 @@ def create_gui():
         with open("config.json", "w") as f:
             json.dump(json_config, f)
         tk.messagebox.showinfo("Settings", "Configuration saved successfully.")
+    
+
+    def config_variable_setter(variable, variable_name: str):
+        global config
+        config[variable_name] = variable
 
 
     config_frame = tk.Frame(window)
@@ -410,23 +414,3 @@ class RegionSelector:
 
     def get_region(self):
         self.root.mainloop()
-
-# Start HP/MP check thread
-def start_hp_mp_check():
-    global hp_mp_check
-    if not hp_mp_check:
-        hp_mp_check = True
-        hp_mp_thread = threading.Thread(
-            target=check_hp_mp,
-            args=(hp_threshold, mp_threshold, hp_bar_position, mp_bar_position, hp_pot_key, mp_pot_key, lambda: hp_mp_check)
-        )
-        hp_mp_thread.start()
-        print("HP/MP check started.")
-
-
-# Stop HP/MP check
-def stop_hp_mp_check():
-    global hp_mp_check
-    if hp_mp_check:
-        hp_mp_check = False
-    print("HP/MP check stopped.")
