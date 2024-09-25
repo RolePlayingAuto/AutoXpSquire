@@ -1,8 +1,10 @@
 import cv2
 import numpy as np
-from PIL import ImageGrab
 import pydirectinput
 import time
+
+from PIL import ImageGrab
+
 
 # Function to calculate bar percentage based on color
 def calculate_bar_percentage(region, target_color_bgr):
@@ -34,6 +36,7 @@ def calculate_bar_percentage(region, target_color_bgr):
     percentage = ((filled_length + 1) / total_length) * 100
     return percentage
 
+
 # Function to read HP and MP values
 def read_hp_mp(hp_bar_position, mp_bar_position):
     if hp_bar_position and mp_bar_position:
@@ -46,9 +49,11 @@ def read_hp_mp(hp_bar_position, mp_bar_position):
         return hp_percentage, mp_percentage
     return None, None
 
+
 # Function to press the potion key
 def use_potion(key):
     pydirectinput.press(key)
+
 
 def check_hp_mp(hp_threshold, mp_threshold, hp_bar_position, mp_bar_position, hp_pot_key, mp_pot_key, is_running_func):
     while is_running_func():
