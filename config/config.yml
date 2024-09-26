@@ -65,4 +65,4 @@ mp_bar_position: !!python/tuple
 - 98
 mp_pot_key: '7'
 mp_threshold: 50
-window_name: Knight Online Client
+window_name: "Game Windows Name"
