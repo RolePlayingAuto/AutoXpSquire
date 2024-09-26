@@ -9,9 +9,11 @@ from PIL import ImageGrab
 
 # Function to calculate bar percentage based on color
 def calculate_bar_percentage(region, target_color_bgr):
+    # Capture the region from the screen
     screenshot = ImageGrab.grab(bbox=region)
     image = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
 
+    # Convert to HSV for better color filtering
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
     # Define color ranges for the bars
@@ -22,9 +24,16 @@ def calculate_bar_percentage(region, target_color_bgr):
         lower_color = np.array([110, 70, 50])
         upper_color = np.array([130, 255, 255])
 
+    # Create a mask that isolates the target color range
     mask = cv2.inRange(hsv_image, lower_color, upper_color)
 
-    # Sum up pixels vertically to project on the x-axis
+    # Show the mask and the captured image for debugging purposes
+    cv2.imshow("Mask", mask)
+    cv2.imshow("Captured Image", image)
+    cv2.waitKey(0)  # Wait for key press to close the window
+    cv2.destroyAllWindows()
+
+    # Sum up the pixels vertically to project on the x-axis
     projection = np.sum(mask, axis=0)
     filled_indices = np.where(projection > 0)[0]
 
@@ -38,8 +47,10 @@ def calculate_bar_percentage(region, target_color_bgr):
     return percentage
 
 
+
 # Function to read HP and MP values
 def read_hp_mp(hp_bar_position, mp_bar_position):
+    print(f"hp bar position {hp_bar_position} mp bar posiiton {mp_bar_position}")
     if hp_bar_position and mp_bar_position:
         hp_percentage = calculate_bar_percentage(hp_bar_position, [0, 0, 255])  # Red HP bar
         mp_percentage = calculate_bar_percentage(mp_bar_position, [255, 0, 0])  # Blue MP bar
@@ -70,16 +81,19 @@ def check_hp_mp(hp_threshold, mp_threshold, hp_bar_position, mp_bar_position, hp
 
 
 # Start HP/MP check thread
-def start_hp_mp_check(config):
-    if config.hp_mp_check:
-        hp_mp_thread = threading.Thread(
-            target=check_hp_mp,
-            args=(config.hp_threshold, config.mp_threshold, config.hp_bar_position, config.mp_bar_position, config.hp_pot_key, config.mp_pot_key, lambda: hp_mp_check)
-        )
-        hp_mp_thread.start()
-        print("HP/MP check started.")
-        return hp_mp_thread
-    else:
+def start_hp_mp_check(config,hp_mp_check):
+    try:
+        if hp_mp_check:
+            hp_mp_thread = threading.Thread(
+                target=check_hp_mp,
+                args=(config["hp_threshold"], config["mp_threshold"], config["hp_bar_position"], config["mp_bar_position"], config["hp_pot_key"], config["mp_pot_key"], lambda: hp_mp_check)
+            )
+            hp_mp_thread.start()
+        
+            print("HP/MP check started.")
+            return hp_mp_thread
+    except Exception as e:
+        print(f"Exception in start_hp_mp_check {e}")
         return None
 
 

@@ -4,13 +4,12 @@ import pygetwindow as gw
 import time
 import tkinter as tk
 from tkinter import ttk, messagebox
-import time
 
 from utils.loader import load_skill_data, write_config_to_file
 from utils.hp_mp import start_hp_mp_check, stop_hp_mp_check
 from utils.auto_attack import start_auto_attack, stop_auto_attack
 
-#constants
+# Constants
 TARGET_WINDOW = None
 
 # GUI interface
@@ -18,7 +17,7 @@ def create_gui(config):
     skill_data = load_skill_data()
     window = tk.Tk()
     window.title("AutoXpSquire")
-    window.geometry("700x1111")  # Expandable by dragging
+    window.geometry("700x800")  # Adjusted for better initial size
 
     tab_control = ttk.Notebook(window)
     control_tab = ttk.Frame(tab_control)
@@ -31,31 +30,32 @@ def create_gui(config):
 
     # Control Tab
     tk.Label(control_tab, text="AutoXpSquire Bot Control", font=("Arial", 14)).pack(pady=10)
-    tk.Label(settings_tab, text="Game Window name:").pack()
+    tk.Label(control_tab, text="Game Window Name:").pack()
     window_name_entry = tk.Entry(control_tab)
     window_name_entry.pack()
-    window_name_entry.insert(0, config['window_name'])
+    window_name_entry.insert(0, config.get('window_name', ''))
+
     # Auto-attack checkbox
     attack_var = tk.BooleanVar()
     attack_checkbox = tk.Checkbutton(control_tab, text="Start Auto-Attack", variable=attack_var,
-                                     command=lambda: config_variable_setter(config,attack_var.get(), "auto_attack_toggle"))
+                                     command=lambda: config_variable_setter(config, attack_var.get(), "auto_attack_toggle"))
     attack_checkbox.pack()
 
     # HP and MP check checkbox
     hp_mp_check_var = tk.BooleanVar()
     hp_mp_checkbox = tk.Checkbutton(control_tab, text="Enable HP/MP Check", variable=hp_mp_check_var,
-                                    command=lambda: config_variable_setter(config,hp_mp_check_var.get(), "hp_mp_check_var"))
+                                    command=lambda: config_variable_setter(config, hp_mp_check_var.get(), "hp_mp_check_var"))
     hp_mp_checkbox.pack()
 
-    def config_variable_setter(config,variable, variable_name: str):
+    def config_variable_setter(config, variable, variable_name: str):
         config[variable_name] = variable
 
     def start_bot():
         global TARGET_WINDOW
-        TARGET_WINDOW = find_window(config.window_name)
+        TARGET_WINDOW = find_window(config["window_name"])
 
         if TARGET_WINDOW is None:
-            print(f"{config.window_name} window not found!")
+            print(f"{config['window_name']} window not found!")
             return
 
         # Bring the game window to the front
@@ -63,11 +63,9 @@ def create_gui(config):
         time.sleep(0.5)
 
         if attack_var.get():
-            start_auto_attack()
-
+            start_auto_attack(config,attack_var.get())
         if hp_mp_check_var.get():
-            start_hp_mp_check()
-
+            start_hp_mp_check(config,hp_mp_check_var.get())
         print("Bot started.")
 
     start_button = tk.Button(control_tab, text="Start Bot", command=start_bot)
@@ -77,11 +75,11 @@ def create_gui(config):
     stop_button.pack(pady=5)
 
     # Settings Tab with sub-tabs
-    settings_notebook = tk.ttk.Notebook(settings_tab)
+    settings_notebook = ttk.Notebook(settings_tab)
     settings_notebook.pack(expand=1, fill="both")
 
-    hp_mp_tab = tk.ttk.Frame(settings_notebook)
-    other_settings_tab = tk.ttk.Frame(settings_notebook)
+    hp_mp_tab = ttk.Frame(settings_notebook)
+    other_settings_tab = ttk.Frame(settings_notebook)
     settings_notebook.add(hp_mp_tab, text="HP/MP")
     settings_notebook.add(other_settings_tab, text="Other Settings")
 
@@ -102,19 +100,14 @@ def create_gui(config):
     mp_coord_label = tk.Label(hp_mp_tab, text="MP Bar Coordinates: Not Selected")
     mp_coord_label.pack(pady=5)
 
-
     # HP and MP coordinate update functions
     def update_hp_bar_position(region):
-        global hp_bar_position
-        hp_bar_position = region
+        config["hp_bar_position"] = region
         hp_coord_label.config(text=f"HP Bar Coordinates: {region}")
 
-
     def update_mp_bar_position(region):
-        global mp_bar_position
-        mp_bar_position = region
+        config["mp_bar_position"] = region
         mp_coord_label.config(text=f"MP Bar Coordinates: {region}")
-
 
     # Settings frame for thresholds and keys
     settings_frame = tk.Frame(hp_mp_tab)
@@ -122,26 +115,25 @@ def create_gui(config):
 
     tk.Label(settings_frame, text="HP Pot Threshold (%):").grid(row=0, column=0, padx=5, pady=5, sticky=tk.E)
     hp_percentage_entry = tk.Entry(settings_frame, width=5)
-    hp_percentage_entry.insert(0, str(config["hp_threshold"]))
+    hp_percentage_entry.insert(0, str(config.get("hp_threshold", 50)))
     hp_percentage_entry.grid(row=0, column=1, padx=5, pady=5)
 
     tk.Label(settings_frame, text="HP Pot Key:").grid(row=0, column=2, padx=5, pady=5, sticky=tk.E)
     hp_pot_key_entry = tk.Entry(settings_frame, width=5)
-    hp_pot_key_entry.insert(0, config["hp_pot_key"])
+    hp_pot_key_entry.insert(0, config.get("hp_pot_key", '1'))
     hp_pot_key_entry.grid(row=0, column=3, padx=5, pady=5)
 
     tk.Label(settings_frame, text="MP Pot Threshold (%):").grid(row=1, column=0, padx=5, pady=5, sticky=tk.E)
     mp_percentage_entry = tk.Entry(settings_frame, width=5)
-    mp_percentage_entry.insert(0, str(config["mp_threshold"]))
+    mp_percentage_entry.insert(0, str(config.get("mp_threshold", 50)))
     mp_percentage_entry.grid(row=1, column=1, padx=5, pady=5)
 
     tk.Label(settings_frame, text="MP Pot Key:").grid(row=1, column=2, padx=5, pady=5, sticky=tk.E)
     mp_pot_key_entry = tk.Entry(settings_frame, width=5)
-    mp_pot_key_entry.insert(0, config["mp_pot_key"])
+    mp_pot_key_entry.insert(0, config.get("mp_pot_key", '2'))
     mp_pot_key_entry.grid(row=1, column=3, padx=5, pady=5)
 
-
-    def save_settings(config):
+    def save_settings():
         try:
             config["hp_threshold"] = int(hp_percentage_entry.get())
             config["mp_threshold"] = int(mp_percentage_entry.get())
@@ -155,8 +147,7 @@ def create_gui(config):
         except Exception as e:
             print(f"Failed to save config settings: {e}")
 
-
-    save_hp_mp_button = tk.Button(hp_mp_tab, text="Save Settings", command=save_settings(config))
+    save_hp_mp_button = tk.Button(hp_mp_tab, text="Save Settings", command=save_settings)
     save_hp_mp_button.pack(pady=10)
 
     # Attack Settings Tab
@@ -170,13 +161,13 @@ def create_gui(config):
     # Class selection dropdown
     tk.Label(attack_settings_tab, text="Select Class:").pack(pady=4)
     selected_class = tk.StringVar()
-    class_dropdown = tk.ttk.Combobox(attack_settings_tab, textvariable=selected_class, values=config["class_options"])
+    config["class_options"] = list(skill_data.keys())
+    class_dropdown = ttk.Combobox(attack_settings_tab, textvariable=selected_class, values=config["class_options"])
     class_dropdown.pack()
 
     # Skill tree frame with canvas and scrollbar
-    subclass_notebook = tk.ttk.Notebook(attack_settings_tab)
+    subclass_notebook = ttk.Notebook(attack_settings_tab)
     subclass_notebook.pack(expand=1, fill="both")
-
 
     def update_subclasses(*args):
         # Clear previous widgets
@@ -184,18 +175,24 @@ def create_gui(config):
             subclass_notebook.forget(tab)
 
         selected = selected_class.get()
+        if not selected or selected == 'None':
+            print("No class selected in update_subclasses.")
+            return
+        if selected not in skill_data:
+            print(f"Selected class '{selected}' not found in skill_data.")
+            return        
         if selected:
             config["attack_settings"]["selected_class"] = selected
 
             # For each subclass
             for subclass in skill_data[selected]:
-                subclass_tab = tk.ttk.Frame(subclass_notebook)
+                subclass_tab = ttk.Frame(subclass_notebook)
                 subclass_notebook.add(subclass_tab, text=subclass)
 
-                config["skills"] = skill_data[selected][subclass]
+                skills = skill_data[selected][subclass]
 
                 # Skill selection
-                for skill_name in config["skills"]:
+                for skill_name in skills:
                     skill_frame = tk.Frame(subclass_tab)
                     skill_frame.pack(fill=tk.X, padx=5, pady=2)
 
@@ -250,91 +247,93 @@ def create_gui(config):
                         # Add the updated skill info
                         config["attack_settings"]["skills"].append(skill_info)
 
-
                     # Bind save on change
                     skill_var.trace("w", lambda *args, save_skill=save_skill: save_skill())
                     skill_bar_entry.bind("<FocusOut>", lambda e, save_skill=save_skill: save_skill())
                     slot_entry.bind("<FocusOut>", lambda e, save_skill=save_skill: save_skill())
 
-
     selected_class.trace("w", update_subclasses)
 
     # Save attack settings button
     def save_attack_settings():
-        config.attack_settings["enable_basic_attack"] = enable_basic_attack_var.get()
+        config["attack_settings"]["enable_basic_attack"] = enable_basic_attack_var.get()
         tk.messagebox.showinfo("Settings", "Attack settings saved.")
 
     save_attack_settings_button = tk.Button(attack_settings_tab, text="Save Attack Settings", command=save_attack_settings)
     save_attack_settings_button.pack(pady=10)
 
-
     # Configuration save/load buttons
     def load_configuration():
-        global config
         if os.path.exists("config.json"):
             with open("config.json", "r") as f:
                 json_config = json.load(f)
-                config.hp_threshold = json_config.get("hp_threshold", config["hp_threshold"])
-                config.mp_threshold = json_config.get("mp_threshold", config["mp_threshold"])
-                config.hp_pot_key = json_config.get("hp_pot_key", config["hp_pot_key"])
-                config.mp_pot_key = json_config.get("mp_pot_key", config["mp_pot_key"])
-                config.hp_bar_position = json_config.get("hp_bar_position", config["hp_bar_position"])
-                config.mp_bar_position = json_config.get("mp_bar_position", config["mp_bar_position"])
-                config.attack_settings = json_config.get("attack_settings", config["attack_settings"])
+                # Update only the keys that are present in json_config
+                for key in json_config:
+                    config[key] = json_config[key]
 
-            # Update GUI elements
-            hp_percentage_entry.delete(0, tk.END)
-            hp_percentage_entry.insert(0, str(config["hp_threshold"]))
-            mp_percentage_entry.delete(0, tk.END)
-            mp_percentage_entry.insert(0, str(config["mp_threshold"]))
-            hp_pot_key_entry.delete(0, tk.END)
-            hp_pot_key_entry.insert(0, config["hp_pot_key"])
-            mp_pot_key_entry.delete(0, tk.END)
-            mp_pot_key_entry.insert(0, config["mp_pot_key"])
+            # Update GUI elements based on the keys present in config
+            if 'hp_threshold' in config:
+                hp_percentage_entry.delete(0, tk.END)
+                hp_percentage_entry.insert(0, str(config['hp_threshold']))
+            if 'mp_threshold' in config:
+                mp_percentage_entry.delete(0, tk.END)
+                mp_percentage_entry.insert(0, str(config['mp_threshold']))
+            if 'hp_pot_key' in config:
+                hp_pot_key_entry.delete(0, tk.END)
+                hp_pot_key_entry.insert(0, config['hp_pot_key'])
+            if 'mp_pot_key' in config:
+                mp_pot_key_entry.delete(0, tk.END)
+                mp_pot_key_entry.insert(0, config['mp_pot_key'])
+            if 'window_name' in config:
+                window_name_entry.delete(0, tk.END)
+                window_name_entry.insert(0, config['window_name'])
+            if 'hp_bar_position' in config:
+                hp_coord_label.config(text=f"HP Bar Coordinates: {config['hp_bar_position']}")
+            if 'mp_bar_position' in config:
+                mp_coord_label.config(text=f"MP Bar Coordinates: {config['mp_bar_position']}")
 
-            hp_coord_label.config(text=f"HP Bar Coordinates: {config['hp_bar_position']}")
-            mp_coord_label.config(text=f"MP Bar Coordinates: {config['mp_bar_position']}")
-
-            enable_basic_attack_var.set(config["attack_settings"].get("enable_basic_attack", False))
-
-            # Set selected class
-            selected_class.set(config["attack_settings"].get("selected_class", ''))
-
-            # Call update_subclasses to rebuild the skill tree with the saved skills
-            update_subclasses()
+            if 'attack_settings' in config:
+                if 'enable_basic_attack' in config['attack_settings']:
+                    enable_basic_attack_var.set(config['attack_settings']['enable_basic_attack'])
+                if 'selected_class' in config['attack_settings']:
+                    selected_class_value = config['attack_settings']['selected_class']
+                    # Ensure selected_class_value is not None
+                    if selected_class_value is not None:
+                        selected_class.set(selected_class_value)
+                    else:
+                        selected_class.set('')  # Set to empty string if None
+                    # Call update_subclasses to rebuild the skill tree with the saved skills
+                    update_subclasses()
+                else:
+                    # If 'selected_class' is not in config, reset the skill tree
+                    selected_class.set('')
+            else:
+                # If 'attack_settings' is not in config, reset relevant GUI elements
+                enable_basic_attack_var.set(False)
+                selected_class.set('')
 
             tk.messagebox.showinfo("Settings", "Configuration loaded successfully.")
         else:
             tk.messagebox.showwarning("Settings", "No configuration file found.")
 
 
+
     def save_configuration():
-        global config
         try:
-            config.hp_threshold = int(hp_percentage_entry.get())
-            config.mp_threshold = int(mp_percentage_entry.get())
-            config.hp_pot_key = hp_pot_key_entry.get()
-            config.mp_pot_key = mp_pot_key_entry.get()
+            config["hp_threshold"] = int(hp_percentage_entry.get())
+            config["mp_threshold"] = int(mp_percentage_entry.get())
+            config["hp_pot_key"] = hp_pot_key_entry.get()
+            config["mp_pot_key"] = mp_pot_key_entry.get()
+            config["window_name"] = window_name_entry.get()
         except ValueError:
             tk.messagebox.showerror("Error", "Threshold values must be numeric.")
             return
 
         # Update 'enable_basic_attack' setting
-        config.attack_settings["enable_basic_attack"] = enable_basic_attack_var.get()
+        config["attack_settings"]["enable_basic_attack"] = enable_basic_attack_var.get()
 
-        json_config = {
-            "hp_threshold": config.hp_threshold,
-            "mp_threshold": config.mp_threshold,
-            "hp_pot_key": config.hp_pot_key,
-            "mp_pot_key": config.mp_pot_key,
-            "hp_bar_position": config.hp_bar_position,
-            "mp_bar_position": config.mp_bar_position,
-            "attack_settings": config.attack_settings
-        }
-        with open("config.json", "w") as f:
-            json.dump(json_config, f)
+        write_config_to_file(config)
         tk.messagebox.showinfo("Settings", "Configuration saved successfully.")
-
 
     config_frame = tk.Frame(window)
     config_frame.pack(pady=5)
@@ -347,7 +346,6 @@ def create_gui(config):
 
     window.mainloop()
 
-
 # Function to find the game window
 def find_window(window_title):
     windows = gw.getWindowsWithTitle(window_title)
@@ -356,19 +354,7 @@ def find_window(window_title):
     else:
         print(f"Window named {window_title} not found!")
         return None
-
-
-def select_region(callback):
-    region_window = tk.Toplevel()
-    region_window.attributes("-fullscreen", True)
-    region_window.attributes("-alpha", 0.3)  # Make the screen semi-transparent
-    region_window.lift()
-    region_window.attributes("-topmost", True)
-    selector = RegionSelector(region_window, callback)
-    selector.get_region()
-
-
-# Region selector class (same as before)
+# Region selector class
 class RegionSelector:
 
     def __init__(self, root, callback):
@@ -406,8 +392,20 @@ class RegionSelector:
         end_y = self.root.winfo_pointery()
         selected_region = (min(self.start_x, end_x), min(self.start_y, end_y),
                            max(self.start_x, end_x), max(self.start_y, end_y))
+        print(f"Selected Region: {selected_region}")  # Debugging the selected region
         self.callback(selected_region)
         self.root.destroy()
 
     def get_region(self):
         self.root.mainloop()
+        
+def select_region(callback):
+    region_window = tk.Toplevel()
+    region_window.attributes("-fullscreen", True)
+    region_window.attributes("-alpha", 0.3)  # Make the screen semi-transparent
+    region_window.lift()
+    region_window.attributes("-topmost", True)
+    selector = RegionSelector(region_window, callback)
+    selector.get_region()
+
+

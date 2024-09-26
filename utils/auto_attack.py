@@ -5,10 +5,10 @@ import time
 auto_attack = False
 
 def auto_attack_function(config):
-    attack_settings = config.attack_settings
+    attack_settings = config["attack_settings"]
     while auto_attack:
-        if config.target_window:
-            config.target_window.activate()
+        if config["target_window"]:
+            config["target_window"].activate()
 
             # Continuously press 'Z' to target
             pydirectinput.press('z')
@@ -41,13 +41,15 @@ def auto_attack_function(config):
             break
 
 
-def start_auto_attack(config):
-    if config.auto_attack:
-        attack_thread = threading.Thread(target=auto_attack_function, args=(config,))
-        attack_thread.start()
-        print("Auto-attack started.")
-        return attack_thread
-    else:
+def start_auto_attack(config,auto_attack):
+    try:
+        if auto_attack:
+            attack_thread = threading.Thread(target=auto_attack_function, args=(config,))
+            attack_thread.start()
+            print("Auto-attack started.")
+            return attack_thread
+    except Exception as e:
+        print(f"Exception in start_auto_attack {e}")
         return None
 
 
