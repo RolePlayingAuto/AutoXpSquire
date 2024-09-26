@@ -1,68 +1,17 @@
-attack_settings:
-  enable_basic_attack: false
-  selected_class: Rogue
-  skills:
-  - enabled: true
-    name: Stab
-    skill_bar: f2
-    slot: '6'
-    subclass: Basic
-  - enabled: true
-    name: Stab2
-    skill_bar: f2
-    slot: '4'
-    subclass: Basic
-  - enabled: false
-    name: Bloody Beast
-    skill_bar: ''
-    slot: ''
-    subclass: Assassinate
-  - enabled: true
-    name: Jab
-    skill_bar: f2
-    slot: '3'
-    subclass: Assassinate
-  - enabled: true
-    name: Pierce
-    skill_bar: f2
-    slot: '5'
-    subclass: Assassinate
-  - enabled: true
-    name: Spike
-    skill_bar: f1
-    slot: '3'
-    subclass: Assassinate
-  - enabled: true
-    name: Thrust
-    skill_bar: f1
-    slot: '4'
-    subclass: Assassinate
-  - enabled: true
-    name: Cut
-    skill_bar: f1
-    slot: '5'
-    subclass: Assassinate
-  - enabled: true
-    name: Shock
-    skill_bar: f1
-    slot: '6'
-    subclass: Assassinate
-auto_attack_toggle: true
-class_options:
-- Rogue
-hp_bar_position: !!python/tuple
-- 34
-- 66
-- 228
-- 79
-hp_mp_check: false
-hp_pot_key: '8'
+window_name: "Game Window Name"
+
 hp_threshold: 50
-mp_bar_position: !!python/tuple
-- 35
-- 83
-- 230
-- 98
-mp_pot_key: '7'
 mp_threshold: 50
-window_name: "Game Windows Name"
+hp_pot_key: "1"
+mp_pot_key: "2"
+
+attack_settings:
+  enable_basic_attack: False
+  selected_class: null
+  skills: []
+
+class_options:
+  - "Rogue"
+  - "Mage"
+  - "Priest"
+  - "Warrior"
