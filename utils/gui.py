@@ -149,9 +149,9 @@ def create_gui(config):
             config["mp_pot_key"] = mp_pot_key_entry.get()
             config["window_name"] = window_name_entry.get()
             write_config_to_file(config)
-            tk.messagebox.showinfo("Settings", "Settings saved successfully.")
+            messagebox.showinfo("Settings", "Settings saved successfully.")
         except ValueError:
-            tk.messagebox.showerror("Error", "Threshold values must be numeric.")
+            messagebox.showerror("Error", "Threshold values must be numeric.")
         except Exception as e:
             print(f"Failed to save config settings: {e}")
 
@@ -262,7 +262,7 @@ def create_gui(config):
     # Save attack settings button
     def save_attack_settings():
         config.attack_settings["enable_basic_attack"] = enable_basic_attack_var.get()
-        tk.messagebox.showinfo("Settings", "Attack settings saved.")
+        messagebox.showinfo("Settings", "Attack settings saved.")
 
     save_attack_settings_button = tk.Button(attack_settings_tab, text="Save Attack Settings", command=save_attack_settings)
     save_attack_settings_button.pack(pady=10)
@@ -303,9 +303,9 @@ def create_gui(config):
             # Call update_subclasses to rebuild the skill tree with the saved skills
             update_subclasses()
 
-            tk.messagebox.showinfo("Settings", "Configuration loaded successfully.")
+            messagebox.showinfo("Settings", "Configuration loaded successfully.")
         else:
-            tk.messagebox.showwarning("Settings", "No configuration file found.")
+            messagebox.showwarning("Settings", "No configuration file found.")
 
 
     def save_configuration():
@@ -316,7 +316,7 @@ def create_gui(config):
             config.hp_pot_key = hp_pot_key_entry.get()
             config.mp_pot_key = mp_pot_key_entry.get()
         except ValueError:
-            tk.messagebox.showerror("Error", "Threshold values must be numeric.")
+            messagebox.showerror("Error", "Threshold values must be numeric.")
             return
 
         # Update 'enable_basic_attack' setting
@@ -333,7 +333,7 @@ def create_gui(config):
         }
         with open("config.json", "w") as f:
             json.dump(json_config, f)
-        tk.messagebox.showinfo("Settings", "Configuration saved successfully.")
+        messagebox.showinfo("Settings", "Configuration saved successfully.")
 
 
     config_frame = tk.Frame(window)
