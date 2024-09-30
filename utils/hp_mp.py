@@ -7,6 +7,8 @@ import threading
 from PIL import ImageGrab
 
 
+stop_hp_mp_event = threading.Event()
+
 # Function to calculate bar percentage based on color
 def calculate_bar_percentage(region, target_color_bgr):
     # Capture the region from the screen
@@ -27,12 +29,6 @@ def calculate_bar_percentage(region, target_color_bgr):
     # Create a mask that isolates the target color range
     mask = cv2.inRange(hsv_image, lower_color, upper_color)
 
-    # Show the mask and the captured image for debugging purposes
-    cv2.imshow("Mask", mask)
-    cv2.imshow("Captured Image", image)
-    cv2.waitKey(0)  # Wait for key press to close the window
-    cv2.destroyAllWindows()
-
     # Sum up the pixels vertically to project on the x-axis
     projection = np.sum(mask, axis=0)
     filled_indices = np.where(projection > 0)[0]
@@ -50,7 +46,7 @@ def calculate_bar_percentage(region, target_color_bgr):
 
 # Function to read HP and MP values
 def read_hp_mp(hp_bar_position, mp_bar_position):
-    print(f"hp bar position {hp_bar_position} mp bar posiiton {mp_bar_position}")
+    print(f"hp bar position {hp_bar_position} mp bar positon {mp_bar_position}")
     if hp_bar_position and mp_bar_position:
         hp_percentage = calculate_bar_percentage(hp_bar_position, [0, 0, 255])  # Red HP bar
         mp_percentage = calculate_bar_percentage(mp_bar_position, [255, 0, 0])  # Blue MP bar
@@ -67,8 +63,8 @@ def use_potion(key):
     pydirectinput.press(key)
 
 
-def check_hp_mp(hp_threshold, mp_threshold, hp_bar_position, mp_bar_position, hp_pot_key, mp_pot_key, is_running_func):
-    while is_running_func():
+def check_hp_mp(hp_threshold, mp_threshold, hp_bar_position, mp_bar_position, hp_pot_key, mp_pot_key):
+    while not stop_hp_mp_event.is_set():
         hp_percentage, mp_percentage = read_hp_mp(hp_bar_position, mp_bar_position)
 
         if hp_percentage is not None and mp_percentage is not None:
@@ -81,12 +77,13 @@ def check_hp_mp(hp_threshold, mp_threshold, hp_bar_position, mp_bar_position, hp
 
 
 # Start HP/MP check thread
-def start_hp_mp_check(config,hp_mp_check):
+def start_hp_mp_check(config):
     try:
-        if hp_mp_check:
+        if config.hp_mp_check:
+            stop_hp_mp_event.clear()
             hp_mp_thread = threading.Thread(
                 target=check_hp_mp,
-                args=(config["hp_threshold"], config["mp_threshold"], config["hp_bar_position"], config["mp_bar_position"], config["hp_pot_key"], config["mp_pot_key"], lambda: hp_mp_check)
+                args=(config["hp_threshold"], config["mp_threshold"], config["hp_bar_position"], config["mp_bar_position"], config["hp_pot_key"], config["mp_pot_key"])
             )
             hp_mp_thread.start()
         
@@ -99,8 +96,7 @@ def start_hp_mp_check(config,hp_mp_check):
 
 # Stop HP/MP check
 def stop_hp_mp_check(hp_mp_thread):
-    global hp_mp_check
+    stop_hp_mp_event.set()
     hp_mp_thread.join()
-    hp_mp_check = False
     print("HP/MP check stopped.")
     return None

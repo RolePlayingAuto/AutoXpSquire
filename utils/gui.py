@@ -1,10 +1,12 @@
 import json
 import os
 import pygetwindow as gw
+import threading
 import time
 import tkinter as tk
 from tkinter import ttk, messagebox
 
+from utils.loader import load_config
 from utils.loader import load_skill_data, write_config_to_file
 from utils.hp_mp import start_hp_mp_check, stop_hp_mp_check
 from utils.auto_attack import start_auto_attack, stop_auto_attack
@@ -12,9 +14,16 @@ from utils.auto_attack import start_auto_attack, stop_auto_attack
 # Constants
 TARGET_WINDOW = None
 
+# Globals
+config = load_config()
+auto_attack_thread = None
+hp_mp_check_thread = None
+
 # GUI interface
-def create_gui(config):
+def create_gui():
+    global config
     skill_data = load_skill_data()
+    #config_thead = start_config_update_thread()
     window = tk.Tk()
     window.title("AutoXpSquire")
     window.geometry("700x800")  # Adjusted for better initial size
@@ -44,14 +53,15 @@ def create_gui(config):
     # HP and MP check checkbox
     hp_mp_check_var = tk.BooleanVar()
     hp_mp_checkbox = tk.Checkbutton(control_tab, text="Enable HP/MP Check", variable=hp_mp_check_var,
-                                    command=lambda: config_variable_setter(config, hp_mp_check_var.get(), "hp_mp_check_var"))
+                                    command=lambda: config_variable_setter(config, hp_mp_check_var.get(), "hp_mp_check"))
     hp_mp_checkbox.pack()
 
     def config_variable_setter(config, variable, variable_name: str):
         config[variable_name] = variable
+        print(f"Config value {variable_name} has been set to: {variable}")
 
     def start_bot():
-        global TARGET_WINDOW
+        global TARGET_WINDOW,  auto_attack_thread, hp_mp_check_thread
         TARGET_WINDOW = find_window(config["window_name"])
 
         if TARGET_WINDOW is None:
@@ -63,15 +73,27 @@ def create_gui(config):
         time.sleep(0.5)
 
         if attack_var.get():
-            start_auto_attack(config,attack_var.get())
+            auto_attack_thread = start_auto_attack(config)
         if hp_mp_check_var.get():
-            start_hp_mp_check(config,hp_mp_check_var.get())
+           hp_mp_check_thread = start_hp_mp_check(config)
         print("Bot started.")
+
+
+    def stop_bot():
+        global auto_attack_thread, hp_mp_check_thread
+        if auto_attack_thread:
+            print("Auto attack thread found, stopping auto attack")
+            auto_attack_thread = stop_auto_attack(auto_attack_thread)
+        if hp_mp_check_thread:
+            print("hp_mp_check thread found, stopping hp_mp_check")
+            hp_mp_check_thread = stop_hp_mp_check(hp_mp_check_thread)
+        print("Bot stopped")
+    
 
     start_button = tk.Button(control_tab, text="Start Bot", command=start_bot)
     start_button.pack(pady=5)
 
-    stop_button = tk.Button(control_tab, text="Stop Bot", command=lambda: [stop_auto_attack(), stop_hp_mp_check()])
+    stop_button = tk.Button(control_tab, text="Stop Bot", command=stop_bot)
     stop_button.pack(pady=5)
 
     # Settings Tab with sub-tabs
@@ -408,4 +430,15 @@ def select_region(callback):
     selector = RegionSelector(region_window, callback)
     selector.get_region()
 
+def config_updater():
+    '''Periodically updates config from file'''
+    global config
+    while True:
+        config = load_config
+        time.sleep(1)
 
+def start_config_update_thread():
+    config_update_thread = threading.Thread(target=config_updater)
+    config_update_thread.start()
+    print("Config update thread started")
+    return config_update_thread

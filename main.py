@@ -31,4 +31,4 @@ def start_global_key_listener():
     listener.start()
 if __name__ == "__main__":
     start_global_key_listener()
-    create_gui(config)
+    create_gui()

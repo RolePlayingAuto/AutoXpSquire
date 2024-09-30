@@ -41,9 +41,9 @@ def auto_attack_function(config):
             break
 
 
-def start_auto_attack(config,auto_attack):
+def start_auto_attack(config):
     try:
-        if auto_attack:
+        if config.auto_attack_toggle:
             attack_thread = threading.Thread(target=auto_attack_function, args=(config,))
             attack_thread.start()
             print("Auto-attack started.")
@@ -54,8 +54,6 @@ def start_auto_attack(config,auto_attack):
 
 
 def stop_auto_attack(thread):
-    global auto_attack
-    auto_attack = False
     thread.join()
     print("Auto-attack stopped.")
     return None
