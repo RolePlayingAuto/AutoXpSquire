@@ -27,7 +27,6 @@ def create_gui():
     window = tk.Tk()
     window.title("AutoXpSquire")
     window.geometry("700x800")  # Adjusted for better initial size
-
     tab_control = ttk.Notebook(window)
     control_tab = ttk.Frame(tab_control)
     settings_tab = ttk.Frame(tab_control)
@@ -71,7 +70,6 @@ def create_gui():
         # Bring the game window to the front
         TARGET_WINDOW.activate()
         time.sleep(0.5)
-
         if attack_var.get():
             auto_attack_thread = start_auto_attack(config)
         if hp_mp_check_var.get():
@@ -286,8 +284,8 @@ def create_gui():
 
     # Configuration save/load buttons
     def load_configuration():
-        if os.path.exists("config.json"):
-            with open("config.json", "r") as f:
+        if os.path.exists("config/config.json"):
+            with open("config/config.json", "r") as f:
                 json_config = json.load(f)
                 # Update only the keys that are present in json_config
                 for key in json_config:
@@ -351,7 +349,6 @@ def create_gui():
             tk.messagebox.showerror("Error", "Threshold values must be numeric.")
             return
 
-        # Update 'enable_basic_attack' setting
         config["attack_settings"]["enable_basic_attack"] = enable_basic_attack_var.get()
 
         write_config_to_file(config)
@@ -430,7 +427,7 @@ def select_region(callback):
     selector = RegionSelector(region_window, callback)
     selector.get_region()
 
-def config_updater():
+def periodic_config_updater():
     '''Periodically updates config from file'''
     global config
     while True:
@@ -438,7 +435,7 @@ def config_updater():
         time.sleep(1)
 
 def start_config_update_thread():
-    config_update_thread = threading.Thread(target=config_updater)
+    config_update_thread = threading.Thread(target=periodic_config_updater)
     config_update_thread.start()
     print("Config update thread started")
     return config_update_thread

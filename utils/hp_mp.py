@@ -79,7 +79,7 @@ def check_hp_mp(hp_threshold, mp_threshold, hp_bar_position, mp_bar_position, hp
 # Start HP/MP check thread
 def start_hp_mp_check(config):
     try:
-        if config.hp_mp_check:
+        if config['hp_mp_check']:
             stop_hp_mp_event.clear()
             hp_mp_thread = threading.Thread(
                 target=check_hp_mp,
