@@ -43,7 +43,7 @@ def auto_attack_function(config):
 
 def start_auto_attack(config):
     try:
-        if config.auto_attack_toggle:
+        if config['auto_attack_toggle']:
             attack_thread = threading.Thread(target=auto_attack_function, args=(config,))
             attack_thread.start()
             print("Auto-attack started.")
