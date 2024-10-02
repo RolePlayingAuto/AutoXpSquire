@@ -1,15 +1,15 @@
 import json
 import os
-import pygetwindow as gw
 import threading
 import time
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import messagebox, ttk
 
-from utils.loader import load_config
-from utils.loader import load_skill_data, write_config_to_file
-from utils.hp_mp import start_hp_mp_check, stop_hp_mp_check
+import pygetwindow as gw
+
 from utils.auto_attack import start_auto_attack, stop_auto_attack
+from utils.hp_mp import start_hp_mp_check, stop_hp_mp_check
+from utils.loader import load_config, load_skill_data, write_config_to_file
 
 # Constants
 TARGET_WINDOW = None

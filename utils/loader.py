@@ -1,6 +1,7 @@
 import os
+
 import yaml
-from yaml import safe_load, dump
+from yaml import dump, safe_load
 
 
 def load_config(config_file="config/config.yml"):

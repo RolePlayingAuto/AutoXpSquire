@@ -1,11 +1,10 @@
+import threading
+import time
+
 import cv2
 import numpy as np
 import pydirectinput
-import time
-import threading
-
 from PIL import ImageGrab
-
 
 stop_hp_mp_event = threading.Event()
 

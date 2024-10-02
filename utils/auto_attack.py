@@ -1,6 +1,7 @@
-import pydirectinput
 import threading
 import time
+
+import pydirectinput
 
 auto_attack = False
 

@@ -1,8 +1,10 @@
-from utils.gui import create_gui
+from pynput import keyboard
+
 from utils.auto_attack import start_auto_attack, stop_auto_attack
+from utils.gui import create_gui
 from utils.hp_mp import start_hp_mp_check, stop_hp_mp_check
 from utils.loader import load_config
-from pynput import keyboard
+
 config = load_config()
 hp_mp_thread = None
 auto_attack_thread = None
