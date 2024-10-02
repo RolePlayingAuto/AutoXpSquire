@@ -5,6 +5,7 @@ import pydirectinput
 
 auto_attack = False
 
+
 def auto_attack_function(config):
     attack_settings = config["attack_settings"]
     while auto_attack:

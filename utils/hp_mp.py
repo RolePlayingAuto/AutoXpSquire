@@ -8,7 +8,7 @@ from PIL import ImageGrab
 
 stop_hp_mp_event = threading.Event()
 
-# Function to calculate bar percentage based on color
+
 def calculate_bar_percentage(region, target_color_bgr):
     # Capture the region from the screen
     screenshot = ImageGrab.grab(bbox=region)
@@ -42,8 +42,6 @@ def calculate_bar_percentage(region, target_color_bgr):
     return percentage
 
 
-
-# Function to read HP and MP values
 def read_hp_mp(hp_bar_position, mp_bar_position):
     print(f"hp bar position {hp_bar_position} mp bar positon {mp_bar_position}")
     if hp_bar_position and mp_bar_position:
@@ -82,10 +80,10 @@ def start_hp_mp_check(config):
             stop_hp_mp_event.clear()
             hp_mp_thread = threading.Thread(
                 target=check_hp_mp,
-                args=(config["hp_threshold"], config["mp_threshold"], config["hp_bar_position"], config["mp_bar_position"], config["hp_pot_key"], config["mp_pot_key"])
+                args=(config["hp_threshold"], config["mp_threshold"], config["hp_bar_position"],
+                      config["mp_bar_position"], config["hp_pot_key"], config["mp_pot_key"])
             )
             hp_mp_thread.start()
-        
             print("HP/MP check started.")
             return hp_mp_thread
     except Exception as e:

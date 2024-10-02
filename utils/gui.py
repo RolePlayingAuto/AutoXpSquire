@@ -1,9 +1,8 @@
 import json
 import os
-import threading
 import time
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import ttk
 
 import pygetwindow as gw
 
@@ -11,19 +10,16 @@ from utils.auto_attack import start_auto_attack, stop_auto_attack
 from utils.hp_mp import start_hp_mp_check, stop_hp_mp_check
 from utils.loader import load_config, load_skill_data, write_config_to_file
 
-# Constants
-TARGET_WINDOW = None
-
 # Globals
 config = load_config()
 auto_attack_thread = None
 hp_mp_check_thread = None
+target_window = None
 
-# GUI interface
+
 def create_gui():
     global config
     skill_data = load_skill_data()
-    #config_thead = start_config_update_thread()
     window = tk.Tk()
     window.title("AutoXpSquire")
     window.geometry("700x800")  # Adjusted for better initial size
@@ -46,13 +42,15 @@ def create_gui():
     # Auto-attack checkbox
     attack_var = tk.BooleanVar()
     attack_checkbox = tk.Checkbutton(control_tab, text="Start Auto-Attack", variable=attack_var,
-                                     command=lambda: config_variable_setter(config, attack_var.get(), "auto_attack_toggle"))
+                                     command=lambda: config_variable_setter(config, attack_var.get(),
+                                                                            "auto_attack_toggle"))
     attack_checkbox.pack()
 
     # HP and MP check checkbox
     hp_mp_check_var = tk.BooleanVar()
     hp_mp_checkbox = tk.Checkbutton(control_tab, text="Enable HP/MP Check", variable=hp_mp_check_var,
-                                    command=lambda: config_variable_setter(config, hp_mp_check_var.get(), "hp_mp_check"))
+                                    command=lambda: config_variable_setter(config, hp_mp_check_var.get(),
+                                                                           "hp_mp_check"))
     hp_mp_checkbox.pack()
 
     def config_variable_setter(config, variable, variable_name: str):
@@ -60,22 +58,21 @@ def create_gui():
         print(f"Config value {variable_name} has been set to: {variable}")
 
     def start_bot():
-        global TARGET_WINDOW,  auto_attack_thread, hp_mp_check_thread
-        TARGET_WINDOW = find_window(config["window_name"])
+        global target_window, auto_attack_thread, hp_mp_check_thread
+        target_window = find_window(config["window_name"])
 
-        if TARGET_WINDOW is None:
+        if target_window is None:
             print(f"{config['window_name']} window not found!")
             return
 
         # Bring the game window to the front
-        TARGET_WINDOW.activate()
+        target_window.activate()
         time.sleep(0.5)
         if attack_var.get():
             auto_attack_thread = start_auto_attack(config)
         if hp_mp_check_var.get():
-           hp_mp_check_thread = start_hp_mp_check(config)
+            hp_mp_check_thread = start_hp_mp_check(config)
         print("Bot started.")
-
 
     def stop_bot():
         global auto_attack_thread, hp_mp_check_thread
@@ -86,7 +83,6 @@ def create_gui():
             print("hp_mp_check thread found, stopping hp_mp_check")
             hp_mp_check_thread = stop_hp_mp_check(hp_mp_check_thread)
         print("Bot stopped")
-    
 
     start_button = tk.Button(control_tab, text="Start Bot", command=start_bot)
     start_button.pack(pady=5)
@@ -107,10 +103,12 @@ def create_gui():
     tk.Label(hp_mp_tab, text="HP/MP Settings", font=("Arial", 12)).pack(pady=10)
 
     # HP and MP bar selection buttons
-    set_hp_button = tk.Button(hp_mp_tab, text="Select HP Bar Region", command=lambda: select_region(update_hp_bar_position))
+    set_hp_button = tk.Button(hp_mp_tab, text="Select HP Bar Region",
+                              command=lambda: select_region(update_hp_bar_position))
     set_hp_button.pack(pady=5)
 
-    set_mp_button = tk.Button(hp_mp_tab, text="Select MP Bar Region", command=lambda: select_region(update_mp_bar_position))
+    set_mp_button = tk.Button(hp_mp_tab, text="Select MP Bar Region",
+                              command=lambda: select_region(update_mp_bar_position))
     set_mp_button.pack(pady=5)
 
     # Labels to display the coordinates
@@ -175,7 +173,8 @@ def create_gui():
 
     # Enable R Attack checkbox
     enable_basic_attack_var = tk.BooleanVar()
-    enable_basic_attack_checkbox = tk.Checkbutton(attack_settings_tab, text="Enable R Attack", variable=enable_basic_attack_var)
+    enable_basic_attack_checkbox = tk.Checkbutton(attack_settings_tab, text="Enable R Attack",
+                                                  variable=enable_basic_attack_var)
     enable_basic_attack_checkbox.pack()
 
     # Class selection dropdown
@@ -200,7 +199,7 @@ def create_gui():
             return
         if selected not in skill_data:
             print(f"Selected class '{selected}' not found in skill_data.")
-            return        
+            return
         if selected:
             config["attack_settings"]["selected_class"] = selected
 
@@ -246,7 +245,13 @@ def create_gui():
                     slot_entry.pack(side=tk.LEFT, padx=5)
 
                     # Load saved skill settings if available
-                    saved_skill = next((s for s in config["attack_settings"].get("skills", []) if s["name"] == skill_name), None)
+                    saved_skill = next(
+                        (
+                            s for s in config["attack_settings"].get("skills", [])
+                            if s["name"] == skill_name
+                        ),
+                        None
+                    )
                     if saved_skill:
                         skill_var.set(saved_skill["enabled"])
                         skill_bar_entry.insert(0, saved_skill["skill_bar"])
@@ -263,7 +268,10 @@ def create_gui():
                             "slot": slot_entry.get()
                         }
                         # Remove any existing entry with this skill name
-                        config["attack_settings"]["skills"] = [s for s in config["attack_settings"]["skills"] if s["name"] != skill_name]
+                        config["attack_settings"]["skills"] = [
+                            s for s in config["attack_settings"]["skills"]
+                            if s["name"] != skill_name
+                        ]
                         # Add the updated skill info
                         config["attack_settings"]["skills"].append(skill_info)
 
@@ -279,7 +287,8 @@ def create_gui():
         config["attack_settings"]["enable_basic_attack"] = enable_basic_attack_var.get()
         tk.messagebox.showinfo("Settings", "Attack settings saved.")
 
-    save_attack_settings_button = tk.Button(attack_settings_tab, text="Save Attack Settings", command=save_attack_settings)
+    save_attack_settings_button = tk.Button(attack_settings_tab, text="Save Attack Settings",
+                                            command=save_attack_settings)
     save_attack_settings_button.pack(pady=10)
 
     # Configuration save/load buttons
@@ -336,8 +345,6 @@ def create_gui():
         else:
             tk.messagebox.showwarning("Settings", "No configuration file found.")
 
-
-
     def save_configuration():
         try:
             config["hp_threshold"] = int(hp_percentage_entry.get())
@@ -365,7 +372,7 @@ def create_gui():
 
     window.mainloop()
 
-# Function to find the game window
+
 def find_window(window_title):
     windows = gw.getWindowsWithTitle(window_title)
     if windows:
@@ -373,7 +380,8 @@ def find_window(window_title):
     else:
         print(f"Window named {window_title} not found!")
         return None
-# Region selector class
+
+
 class RegionSelector:
 
     def __init__(self, root, callback):
@@ -417,7 +425,8 @@ class RegionSelector:
 
     def get_region(self):
         self.root.mainloop()
-        
+
+
 def select_region(callback):
     region_window = tk.Toplevel()
     region_window.attributes("-fullscreen", True)
@@ -426,16 +435,3 @@ def select_region(callback):
     region_window.attributes("-topmost", True)
     selector = RegionSelector(region_window, callback)
     selector.get_region()
-
-def periodic_config_updater():
-    '''Periodically updates config from file'''
-    global config
-    while True:
-        config = load_config
-        time.sleep(1)
-
-def start_config_update_thread():
-    config_update_thread = threading.Thread(target=periodic_config_updater)
-    config_update_thread.start()
-    print("Config update thread started")
-    return config_update_thread

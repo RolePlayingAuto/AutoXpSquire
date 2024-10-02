@@ -13,4 +13,4 @@ Helper for your RPG fantasies to become the best Knight via Python
 Only auto potion handling works with this version. 
 - Set the game window name and potions slots. 
 - Select the HP and MP bar regions. (Resetted every run)
-- Save settings and `Start Bot`. Stop bot via `ESC` or Alt-Tab `Stop Bot` button.
+- Save settings and `Start Bot`. Stop bot via Alt-Tab `Stop Bot` button. Alternatively use `F11` to start and `ESC` to stop.

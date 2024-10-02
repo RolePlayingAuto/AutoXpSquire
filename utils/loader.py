@@ -8,7 +8,6 @@ def load_config(config_file="config/config.yml"):
     try:
         if not os.path.exists(config_file):
             raise FileNotFoundError(f"Config file {config_file} not found.")
-        
         # Using yaml.Loader to allow python-specific types like !!python/tuple
         with open(config_file, 'r') as file:
             config = yaml.load(file, Loader=yaml.Loader)
@@ -81,4 +80,4 @@ def write_config_to_file(config, filename="config/config.yml"):
         return {}
     except Exception as e:
         print(f"Error Writing config file: {e}")
-        return {}        
+        return {}
