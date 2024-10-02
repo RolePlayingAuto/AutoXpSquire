@@ -16,9 +16,11 @@ def on_press_events_toggle(key):
                 auto_attack_thread = stop_auto_attack(auto_attack_thread)
             if hp_mp_thread:
                 hp_mp_thread = stop_hp_mp_check(hp_mp_thread)
+            print("Bot Stopped")
         elif key == keyboard.Key.f11:
             auto_attack_thread = start_auto_attack(config)
             hp_mp_thread = start_hp_mp_check(config)
+            print("Bot Started")
     except AttributeError:
         pass
     except Exception as e:
