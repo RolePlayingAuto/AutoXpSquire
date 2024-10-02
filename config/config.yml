@@ -1,0 +1,17 @@
+window_name: "Game Window Name"
+
+hp_threshold: 50
+mp_threshold: 50
+hp_pot_key: "1"
+mp_pot_key: "2"
+
+attack_settings:
+  enable_basic_attack: False
+  selected_class: null
+  skills: []
+
+class_options:
+  - "Rogue"
+  - "Mage"
+  - "Priest"
+  - "Warrior"

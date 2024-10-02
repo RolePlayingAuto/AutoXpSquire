@@ -1,14 +1,20 @@
-import cv2
-import numpy as np
-from PIL import ImageGrab
-import pydirectinput
+import threading
 import time
 
-# Function to calculate bar percentage based on color
+import cv2
+import numpy as np
+import pydirectinput
+from PIL import ImageGrab
+
+stop_hp_mp_event = threading.Event()
+
+
 def calculate_bar_percentage(region, target_color_bgr):
+    # Capture the region from the screen
     screenshot = ImageGrab.grab(bbox=region)
     image = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
 
+    # Convert to HSV for better color filtering
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
     # Define color ranges for the bars
@@ -19,9 +25,10 @@ def calculate_bar_percentage(region, target_color_bgr):
         lower_color = np.array([110, 70, 50])
         upper_color = np.array([130, 255, 255])
 
+    # Create a mask that isolates the target color range
     mask = cv2.inRange(hsv_image, lower_color, upper_color)
 
-    # Sum up pixels vertically to project on the x-axis
+    # Sum up the pixels vertically to project on the x-axis
     projection = np.sum(mask, axis=0)
     filled_indices = np.where(projection > 0)[0]
 
@@ -34,8 +41,9 @@ def calculate_bar_percentage(region, target_color_bgr):
     percentage = ((filled_length + 1) / total_length) * 100
     return percentage
 
-# Function to read HP and MP values
+
 def read_hp_mp(hp_bar_position, mp_bar_position):
+    print(f"hp bar position {hp_bar_position} mp bar positon {mp_bar_position}")
     if hp_bar_position and mp_bar_position:
         hp_percentage = calculate_bar_percentage(hp_bar_position, [0, 0, 255])  # Red HP bar
         mp_percentage = calculate_bar_percentage(mp_bar_position, [255, 0, 0])  # Blue MP bar
@@ -46,12 +54,14 @@ def read_hp_mp(hp_bar_position, mp_bar_position):
         return hp_percentage, mp_percentage
     return None, None
 
+
 # Function to press the potion key
 def use_potion(key):
     pydirectinput.press(key)
 
-def check_hp_mp(hp_threshold, mp_threshold, hp_bar_position, mp_bar_position, hp_pot_key, mp_pot_key, is_running_func):
-    while is_running_func():
+
+def check_hp_mp(hp_threshold, mp_threshold, hp_bar_position, mp_bar_position, hp_pot_key, mp_pot_key):
+    while not stop_hp_mp_event.is_set():
         hp_percentage, mp_percentage = read_hp_mp(hp_bar_position, mp_bar_position)
 
         if hp_percentage is not None and mp_percentage is not None:
@@ -61,3 +71,29 @@ def check_hp_mp(hp_threshold, mp_threshold, hp_bar_position, mp_bar_position, hp
             if mp_percentage <= mp_threshold:
                 use_potion(mp_pot_key)
         time.sleep(0.5)  # Reduced sleep time for faster response
+
+
+# Start HP/MP check thread
+def start_hp_mp_check(config):
+    try:
+        if config['hp_mp_check']:
+            stop_hp_mp_event.clear()
+            hp_mp_thread = threading.Thread(
+                target=check_hp_mp,
+                args=(config["hp_threshold"], config["mp_threshold"], config["hp_bar_position"],
+                      config["mp_bar_position"], config["hp_pot_key"], config["mp_pot_key"])
+            )
+            hp_mp_thread.start()
+            print("HP/MP check started.")
+            return hp_mp_thread
+    except Exception as e:
+        print(f"Exception in start_hp_mp_check {e}")
+        return None
+
+
+# Stop HP/MP check
+def stop_hp_mp_check(hp_mp_thread):
+    stop_hp_mp_event.set()
+    hp_mp_thread.join()
+    print("HP/MP check stopped.")
+    return None
