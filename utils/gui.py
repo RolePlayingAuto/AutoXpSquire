@@ -2,7 +2,7 @@ import json
 import os
 import time
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox # noqa: F401
 
 import pygetwindow as gw
 
