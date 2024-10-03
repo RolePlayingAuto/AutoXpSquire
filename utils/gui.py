@@ -2,23 +2,20 @@ import json
 import os
 import time
 import tkinter as tk
-from tkinter import ttk, messagebox # noqa: F401
+from tkinter import ttk, messagebox  # noqa: F401
 
 import pygetwindow as gw
 
+import utils.shared as shared
 from utils.auto_attack import start_auto_attack, stop_auto_attack
 from utils.hp_mp import start_hp_mp_check, stop_hp_mp_check
-from utils.loader import load_config, load_skill_data, write_config_to_file
+from utils.loader import load_skill_data, write_config_to_file
 
 # Globals
-config = load_config()
-auto_attack_thread = None
-hp_mp_check_thread = None
 target_window = None
 
 
 def create_gui():
-    global config
     skill_data = load_skill_data()
     window = tk.Tk()
     window.title("AutoXpSquire")
@@ -37,19 +34,19 @@ def create_gui():
     tk.Label(control_tab, text="Game Window Name:").pack()
     window_name_entry = tk.Entry(control_tab)
     window_name_entry.pack()
-    window_name_entry.insert(0, config.get('window_name', ''))
+    window_name_entry.insert(0, shared.config.get('window_name', ''))
 
     # Auto-attack checkbox
     attack_var = tk.BooleanVar()
     attack_checkbox = tk.Checkbutton(control_tab, text="Start Auto-Attack", variable=attack_var,
-                                     command=lambda: config_variable_setter(config, attack_var.get(),
+                                     command=lambda: config_variable_setter(shared.config, attack_var.get(),
                                                                             "auto_attack_toggle"))
     attack_checkbox.pack()
 
     # HP and MP check checkbox
     hp_mp_check_var = tk.BooleanVar()
     hp_mp_checkbox = tk.Checkbutton(control_tab, text="Enable HP/MP Check", variable=hp_mp_check_var,
-                                    command=lambda: config_variable_setter(config, hp_mp_check_var.get(),
+                                    command=lambda: config_variable_setter(shared.config, hp_mp_check_var.get(),
                                                                            "hp_mp_check"))
     hp_mp_checkbox.pack()
 
@@ -58,30 +55,29 @@ def create_gui():
         print(f"Config value {variable_name} has been set to: {variable}")
 
     def start_bot():
-        global target_window, auto_attack_thread, hp_mp_check_thread
-        target_window = find_window(config["window_name"])
+        global target_window
+        target_window = find_window(shared.config["window_name"])
 
         if target_window is None:
-            print(f"{config['window_name']} window not found!")
+            print(f"{shared.config['window_name']} window not found!")
             return
 
         # Bring the game window to the front
         target_window.activate()
         time.sleep(0.5)
         if attack_var.get():
-            auto_attack_thread = start_auto_attack(config)
+            shared.auto_attack_thread = start_auto_attack(shared.config)
         if hp_mp_check_var.get():
-            hp_mp_check_thread = start_hp_mp_check(config)
+            shared.hp_mp_check_thread = start_hp_mp_check(shared.config)
         print("Bot started.")
 
     def stop_bot():
-        global auto_attack_thread, hp_mp_check_thread
-        if auto_attack_thread:
+        if shared.auto_attack_thread:
             print("Auto attack thread found, stopping auto attack")
-            auto_attack_thread = stop_auto_attack(auto_attack_thread)
-        if hp_mp_check_thread:
+            shared.auto_attack_thread = stop_auto_attack(shared.auto_attack_thread)
+        if shared.hp_mp_check_thread:
             print("hp_mp_check thread found, stopping hp_mp_check")
-            hp_mp_check_thread = stop_hp_mp_check(hp_mp_check_thread)
+            shared.hp_mp_check_thread = stop_hp_mp_check(shared.hp_mp_check_thread)
         print("Bot stopped")
 
     start_button = tk.Button(control_tab, text="Start Bot", command=start_bot)
@@ -120,11 +116,11 @@ def create_gui():
 
     # HP and MP coordinate update functions
     def update_hp_bar_position(region):
-        config["hp_bar_position"] = region
+        shared.config["hp_bar_position"] = region
         hp_coord_label.config(text=f"HP Bar Coordinates: {region}")
 
     def update_mp_bar_position(region):
-        config["mp_bar_position"] = region
+        shared.config["mp_bar_position"] = region
         mp_coord_label.config(text=f"MP Bar Coordinates: {region}")
 
     # Settings frame for thresholds and keys
@@ -133,32 +129,32 @@ def create_gui():
 
     tk.Label(settings_frame, text="HP Pot Threshold (%):").grid(row=0, column=0, padx=5, pady=5, sticky=tk.E)
     hp_percentage_entry = tk.Entry(settings_frame, width=5)
-    hp_percentage_entry.insert(0, str(config.get("hp_threshold", 50)))
+    hp_percentage_entry.insert(0, str(shared.config.get("hp_threshold", 50)))
     hp_percentage_entry.grid(row=0, column=1, padx=5, pady=5)
 
     tk.Label(settings_frame, text="HP Pot Key:").grid(row=0, column=2, padx=5, pady=5, sticky=tk.E)
     hp_pot_key_entry = tk.Entry(settings_frame, width=5)
-    hp_pot_key_entry.insert(0, config.get("hp_pot_key", '1'))
+    hp_pot_key_entry.insert(0, shared.config.get("hp_pot_key", '1'))
     hp_pot_key_entry.grid(row=0, column=3, padx=5, pady=5)
 
     tk.Label(settings_frame, text="MP Pot Threshold (%):").grid(row=1, column=0, padx=5, pady=5, sticky=tk.E)
     mp_percentage_entry = tk.Entry(settings_frame, width=5)
-    mp_percentage_entry.insert(0, str(config.get("mp_threshold", 50)))
+    mp_percentage_entry.insert(0, str(shared.config.get("mp_threshold", 50)))
     mp_percentage_entry.grid(row=1, column=1, padx=5, pady=5)
 
     tk.Label(settings_frame, text="MP Pot Key:").grid(row=1, column=2, padx=5, pady=5, sticky=tk.E)
     mp_pot_key_entry = tk.Entry(settings_frame, width=5)
-    mp_pot_key_entry.insert(0, config.get("mp_pot_key", '2'))
+    mp_pot_key_entry.insert(0, shared.config.get("mp_pot_key", '2'))
     mp_pot_key_entry.grid(row=1, column=3, padx=5, pady=5)
 
     def save_settings():
         try:
-            config["hp_threshold"] = int(hp_percentage_entry.get())
-            config["mp_threshold"] = int(mp_percentage_entry.get())
-            config["hp_pot_key"] = hp_pot_key_entry.get()
-            config["mp_pot_key"] = mp_pot_key_entry.get()
-            config["window_name"] = window_name_entry.get()
-            write_config_to_file(config)
+            shared.config["hp_threshold"] = int(hp_percentage_entry.get())
+            shared.config["mp_threshold"] = int(mp_percentage_entry.get())
+            shared.config["hp_pot_key"] = hp_pot_key_entry.get()
+            shared.config["mp_pot_key"] = mp_pot_key_entry.get()
+            shared.config["window_name"] = window_name_entry.get()
+            write_config_to_file(shared.config)
             tk.messagebox.showinfo("Settings", "Settings saved successfully.")
         except ValueError:
             tk.messagebox.showerror("Error", "Threshold values must be numeric.")
@@ -180,8 +176,9 @@ def create_gui():
     # Class selection dropdown
     tk.Label(attack_settings_tab, text="Select Class:").pack(pady=4)
     selected_class = tk.StringVar()
-    config["class_options"] = list(skill_data.keys())
-    class_dropdown = ttk.Combobox(attack_settings_tab, textvariable=selected_class, values=config["class_options"])
+    shared.config["class_options"] = list(skill_data.keys())
+    class_dropdown = ttk.Combobox(attack_settings_tab, textvariable=selected_class,
+                                  values=shared.config["class_options"])
     class_dropdown.pack()
 
     # Skill tree frame with canvas and scrollbar
@@ -201,7 +198,7 @@ def create_gui():
             print(f"Selected class '{selected}' not found in skill_data.")
             return
         if selected:
-            config["attack_settings"]["selected_class"] = selected
+            shared.config["attack_settings"]["selected_class"] = selected
 
             # For each subclass
             for subclass in skill_data[selected]:
@@ -247,7 +244,7 @@ def create_gui():
                     # Load saved skill settings if available
                     saved_skill = next(
                         (
-                            s for s in config["attack_settings"].get("skills", [])
+                            s for s in shared.config["attack_settings"].get("skills", [])
                             if s["name"] == skill_name
                         ),
                         None
@@ -268,12 +265,12 @@ def create_gui():
                             "slot": slot_entry.get()
                         }
                         # Remove any existing entry with this skill name
-                        config["attack_settings"]["skills"] = [
-                            s for s in config["attack_settings"]["skills"]
+                        shared.config["attack_settings"]["skills"] = [
+                            s for s in shared.config["attack_settings"]["skills"]
                             if s["name"] != skill_name
                         ]
                         # Add the updated skill info
-                        config["attack_settings"]["skills"].append(skill_info)
+                        shared.config["attack_settings"]["skills"].append(skill_info)
 
                     # Bind save on change
                     skill_var.trace("w", lambda *args, save_skill=save_skill: save_skill())
@@ -284,7 +281,7 @@ def create_gui():
 
     # Save attack settings button
     def save_attack_settings():
-        config["attack_settings"]["enable_basic_attack"] = enable_basic_attack_var.get()
+        shared.config["attack_settings"]["enable_basic_attack"] = enable_basic_attack_var.get()
         tk.messagebox.showinfo("Settings", "Attack settings saved.")
 
     save_attack_settings_button = tk.Button(attack_settings_tab, text="Save Attack Settings",
@@ -298,34 +295,34 @@ def create_gui():
                 json_config = json.load(f)
                 # Update only the keys that are present in json_config
                 for key in json_config:
-                    config[key] = json_config[key]
+                    shared.config[key] = json_config[key]
 
             # Update GUI elements based on the keys present in config
-            if 'hp_threshold' in config:
+            if 'hp_threshold' in shared.config:
                 hp_percentage_entry.delete(0, tk.END)
-                hp_percentage_entry.insert(0, str(config['hp_threshold']))
-            if 'mp_threshold' in config:
+                hp_percentage_entry.insert(0, str(shared.config['hp_threshold']))
+            if 'mp_threshold' in shared.config:
                 mp_percentage_entry.delete(0, tk.END)
-                mp_percentage_entry.insert(0, str(config['mp_threshold']))
-            if 'hp_pot_key' in config:
+                mp_percentage_entry.insert(0, str(shared.config['mp_threshold']))
+            if 'hp_pot_key' in shared.config:
                 hp_pot_key_entry.delete(0, tk.END)
-                hp_pot_key_entry.insert(0, config['hp_pot_key'])
-            if 'mp_pot_key' in config:
+                hp_pot_key_entry.insert(0, shared.config['hp_pot_key'])
+            if 'mp_pot_key' in shared.config:
                 mp_pot_key_entry.delete(0, tk.END)
-                mp_pot_key_entry.insert(0, config['mp_pot_key'])
-            if 'window_name' in config:
+                mp_pot_key_entry.insert(0, shared.config['mp_pot_key'])
+            if 'window_name' in shared.config:
                 window_name_entry.delete(0, tk.END)
-                window_name_entry.insert(0, config['window_name'])
-            if 'hp_bar_position' in config:
-                hp_coord_label.config(text=f"HP Bar Coordinates: {config['hp_bar_position']}")
-            if 'mp_bar_position' in config:
-                mp_coord_label.config(text=f"MP Bar Coordinates: {config['mp_bar_position']}")
+                window_name_entry.insert(0, shared.config['window_name'])
+            if 'hp_bar_position' in shared.config:
+                hp_coord_label.config(text=f"HP Bar Coordinates: {shared.config['hp_bar_position']}")
+            if 'mp_bar_position' in shared.config:
+                mp_coord_label.config(text=f"MP Bar Coordinates: {shared.config['mp_bar_position']}")
 
-            if 'attack_settings' in config:
-                if 'enable_basic_attack' in config['attack_settings']:
-                    enable_basic_attack_var.set(config['attack_settings']['enable_basic_attack'])
-                if 'selected_class' in config['attack_settings']:
-                    selected_class_value = config['attack_settings']['selected_class']
+            if 'attack_settings' in shared.config:
+                if 'enable_basic_attack' in shared.config['attack_settings']:
+                    enable_basic_attack_var.set(shared.config['attack_settings']['enable_basic_attack'])
+                if 'selected_class' in shared.config['attack_settings']:
+                    selected_class_value = shared.config['attack_settings']['selected_class']
                     # Ensure selected_class_value is not None
                     if selected_class_value is not None:
                         selected_class.set(selected_class_value)
@@ -347,18 +344,18 @@ def create_gui():
 
     def save_configuration():
         try:
-            config["hp_threshold"] = int(hp_percentage_entry.get())
-            config["mp_threshold"] = int(mp_percentage_entry.get())
-            config["hp_pot_key"] = hp_pot_key_entry.get()
-            config["mp_pot_key"] = mp_pot_key_entry.get()
-            config["window_name"] = window_name_entry.get()
+            shared.config["hp_threshold"] = int(hp_percentage_entry.get())
+            shared.config["mp_threshold"] = int(mp_percentage_entry.get())
+            shared.config["hp_pot_key"] = hp_pot_key_entry.get()
+            shared.config["mp_pot_key"] = mp_pot_key_entry.get()
+            shared.config["window_name"] = window_name_entry.get()
         except ValueError:
             tk.messagebox.showerror("Error", "Threshold values must be numeric.")
             return
 
-        config["attack_settings"]["enable_basic_attack"] = enable_basic_attack_var.get()
+        shared.config["attack_settings"]["enable_basic_attack"] = enable_basic_attack_var.get()
 
-        write_config_to_file(config)
+        write_config_to_file(shared.config)
         tk.messagebox.showinfo("Settings", "Configuration saved successfully.")
 
     config_frame = tk.Frame(window)
