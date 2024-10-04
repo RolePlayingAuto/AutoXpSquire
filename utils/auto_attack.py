@@ -6,7 +6,7 @@ import pydirectinput
 auto_attack = False
 
 
-def auto_attack_function(config):
+def auto_attack_function(config: dict) -> None:
     attack_settings = config["attack_settings"]
     while auto_attack:
         if config["target_window"]:
@@ -43,19 +43,21 @@ def auto_attack_function(config):
             break
 
 
-def start_auto_attack(config):
+def start_auto_attack(config: dict) -> threading.Thread | None:
     try:
         if config['auto_attack_toggle']:
             attack_thread = threading.Thread(target=auto_attack_function, args=(config,))
             attack_thread.start()
             print("Auto-attack started.")
             return attack_thread
+        else:
+            return None
     except Exception as e:
         print(f"Exception in start_auto_attack {e}")
         return None
 
 
-def stop_auto_attack(thread):
+def stop_auto_attack(thread: threading.Thread) -> None:
     thread.join()
     print("Auto-attack stopped.")
     return None

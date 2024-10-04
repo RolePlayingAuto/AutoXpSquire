@@ -8,7 +8,7 @@ from utils.loader import load_config
 
 
 # ESC and F11 key listener
-def on_press_events_toggle(key):
+def on_press_events_toggle(key: keyboard.Key) -> None:
     try:
         if key == keyboard.Key.esc:  # Stop the bot
             stop_threads()
@@ -22,20 +22,22 @@ def on_press_events_toggle(key):
         print(f"on_press_event failed: {e}")
 
 
-def start_global_key_listener():
+def start_global_key_listener() -> None:
     listener = keyboard.Listener(on_press=on_press_events_toggle)
     shared.config = load_config()
     listener.start()
 
 
-def stop_threads():
+def stop_threads() -> None:
     if shared.auto_attack_thread:
-        shared.auto_attack_thread = stop_auto_attack(shared.auto_attack_thread)
+        stop_auto_attack(shared.auto_attack_thread)
+        shared.auto_attack_thread = None
     if shared.hp_mp_check_thread:
-        shared.hp_mp_check_thread = stop_hp_mp_check(shared.hp_mp_check_thread)
+        stop_hp_mp_check(shared.hp_mp_check_thread)
+        shared.hp_mp_check_thread = None
 
 
-def start_threads():
+def start_threads() -> None:
     shared.auto_attack_thread = start_auto_attack(shared.config)
     shared.hp_mp_check_thread = start_hp_mp_check(shared.config)
 

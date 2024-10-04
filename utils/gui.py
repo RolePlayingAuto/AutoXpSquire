@@ -3,6 +3,7 @@ import os
 import time
 import tkinter as tk
 from tkinter import messagebox, ttk  # noqa: F401
+from typing import Any, Callable, Optional, Tuple
 
 import pygetwindow as gw
 
@@ -15,7 +16,7 @@ from utils.loader import load_skill_data, write_config_to_file
 target_window = None
 
 
-def create_gui():
+def create_gui() -> None:
     skill_data = load_skill_data()
     window = tk.Tk()
     window.title("AutoXpSquire")
@@ -50,11 +51,11 @@ def create_gui():
                                                                            "hp_mp_check"))
     hp_mp_checkbox.pack()
 
-    def config_variable_setter(config, variable, variable_name: str):
+    def config_variable_setter(config: dict, variable: Any, variable_name: str) -> None:
         config[variable_name] = variable
         print(f"Config value {variable_name} has been set to: {variable}")
 
-    def start_bot():
+    def start_bot() -> None:
         global target_window
         target_window = find_window(shared.config["window_name"])
 
@@ -71,13 +72,15 @@ def create_gui():
             shared.hp_mp_check_thread = start_hp_mp_check(shared.config)
         print("Bot started.")
 
-    def stop_bot():
+    def stop_bot() -> None:
         if shared.auto_attack_thread:
             print("Auto attack thread found, stopping auto attack")
-            shared.auto_attack_thread = stop_auto_attack(shared.auto_attack_thread)
+            stop_auto_attack(shared.auto_attack_thread)
+            shared.auto_attack_thread = None
         if shared.hp_mp_check_thread:
             print("hp_mp_check thread found, stopping hp_mp_check")
-            shared.hp_mp_check_thread = stop_hp_mp_check(shared.hp_mp_check_thread)
+            stop_hp_mp_check(shared.hp_mp_check_thread)
+            shared.hp_mp_check_thread = None
         print("Bot stopped")
 
     start_button = tk.Button(control_tab, text="Start Bot", command=start_bot)
@@ -115,11 +118,11 @@ def create_gui():
     mp_coord_label.pack(pady=5)
 
     # HP and MP coordinate update functions
-    def update_hp_bar_position(region):
+    def update_hp_bar_position(region: Tuple[int, int, int, int]) -> None:
         shared.config["hp_bar_position"] = region
         hp_coord_label.config(text=f"HP Bar Coordinates: {region}")
 
-    def update_mp_bar_position(region):
+    def update_mp_bar_position(region: Tuple[int, int, int, int]) -> None:
         shared.config["mp_bar_position"] = region
         mp_coord_label.config(text=f"MP Bar Coordinates: {region}")
 
@@ -147,7 +150,7 @@ def create_gui():
     mp_pot_key_entry.insert(0, shared.config.get("mp_pot_key", '2'))
     mp_pot_key_entry.grid(row=1, column=3, padx=5, pady=5)
 
-    def save_settings():
+    def save_settings() -> None:
         try:
             shared.config["hp_threshold"] = int(hp_percentage_entry.get())
             shared.config["mp_threshold"] = int(mp_percentage_entry.get())
@@ -184,8 +187,8 @@ def create_gui():
     # Skill tree frame with canvas and scrollbar
     subclass_notebook = ttk.Notebook(attack_settings_tab)
     subclass_notebook.pack(expand=1, fill="both")
-
-    def update_subclasses(*args):
+     
+    def update_subclasses(*args: Any) -> None:
         # Clear previous widgets
         for tab in subclass_notebook.tabs():
             subclass_notebook.forget(tab)
@@ -220,8 +223,8 @@ def create_gui():
                     skill_icon_path = f"static/{selected.lower()}_{subclass.lower()}_{skill_name.lower()}.png"
                     if os.path.exists(skill_icon_path):
                         skill_image = tk.PhotoImage(file=skill_icon_path)
-                        skill_label = tk.Label(skill_frame, image=skill_image)
-                        skill_label.image = skill_image  # Keep a reference
+                        skill_label: tk.Label = tk.Label(skill_frame, image=skill_image)
+                        skill_label.image = skill_image  # type: ignore[attr-defined] # Keep reference
                         skill_label.pack(side=tk.LEFT, padx=5)
                     else:
                         # Placeholder if image not found
@@ -273,14 +276,17 @@ def create_gui():
                         shared.config["attack_settings"]["skills"].append(skill_info)
 
                     # Bind save on change
-                    skill_var.trace("w", lambda *args, save_skill=save_skill: save_skill())
-                    skill_bar_entry.bind("<FocusOut>", lambda e, save_skill=save_skill: save_skill())
-                    slot_entry.bind("<FocusOut>", lambda e, save_skill=save_skill: save_skill())
+                    skill_var.trace_add("write",
+                                        lambda *args, save_skill=save_skill: save_skill())  # type: ignore[misc]
+                    skill_bar_entry.bind("<FocusOut>",
+                                         lambda e, save_skill=save_skill: save_skill())  # type: ignore[misc]
+                    slot_entry.bind("<FocusOut>",
+                                    lambda e, save_skill=save_skill: save_skill())  # type: ignore[misc]
 
-    selected_class.trace("w", update_subclasses)
+    selected_class.trace_add("write", update_subclasses)
 
     # Save attack settings button
-    def save_attack_settings():
+    def save_attack_settings() -> None:
         shared.config["attack_settings"]["enable_basic_attack"] = enable_basic_attack_var.get()
         tk.messagebox.showinfo("Settings", "Attack settings saved.")
 
@@ -289,7 +295,7 @@ def create_gui():
     save_attack_settings_button.pack(pady=10)
 
     # Configuration save/load buttons
-    def load_configuration():
+    def load_configuration() -> None:
         if os.path.exists("config/config.json"):
             with open("config/config.json", "r") as f:
                 json_config = json.load(f)
@@ -342,7 +348,7 @@ def create_gui():
         else:
             tk.messagebox.showwarning("Settings", "No configuration file found.")
 
-    def save_configuration():
+    def save_configuration() -> None:
         try:
             shared.config["hp_threshold"] = int(hp_percentage_entry.get())
             shared.config["mp_threshold"] = int(mp_percentage_entry.get())
@@ -370,7 +376,7 @@ def create_gui():
     window.mainloop()
 
 
-def find_window(window_title):
+def find_window(window_title: str) -> Optional[Any]:
     windows = gw.getWindowsWithTitle(window_title)
     if windows:
         return windows[0]
@@ -381,50 +387,52 @@ def find_window(window_title):
 
 class RegionSelector:
 
-    def __init__(self, root, callback):
+    def __init__(self, root: tk.Toplevel, callback: Callable[[Tuple[int, int, int, int]], None]) -> None:
         self.root = root
         self.callback = callback
         self.canvas = tk.Canvas(self.root, cursor="cross", highlightthickness=0)
         self.canvas.pack(fill=tk.BOTH, expand=True)
-        self.start_x = None
-        self.start_y = None
-        self.rect_id = None
+        self.start_x: Optional[int] = None
+        self.start_y: Optional[int] = None
+        self.rect_id: Optional[int] = None
 
         self.canvas.bind("<ButtonPress-1>", self.on_button_press)
         self.canvas.bind("<B1-Motion>", self.on_mouse_drag)
         self.canvas.bind("<ButtonRelease-1>", self.on_button_release)
 
-    def on_button_press(self, event):
+    def on_button_press(self, event: tk.Event) -> None:
         self.start_x = self.root.winfo_pointerx()
         self.start_y = self.root.winfo_pointery()
         if self.rect_id:
             self.canvas.delete(self.rect_id)
 
-    def on_mouse_drag(self, event):
+    def on_mouse_drag(self, event: tk.Event) -> None:
         cur_x = self.root.winfo_pointerx()
         cur_y = self.root.winfo_pointery()
         if self.rect_id:
             self.canvas.delete(self.rect_id)
-        self.rect_id = self.canvas.create_rectangle(self.start_x - self.root.winfo_rootx(),
-                                                    self.start_y - self.root.winfo_rooty(),
-                                                    cur_x - self.root.winfo_rootx(),
-                                                    cur_y - self.root.winfo_rooty(),
-                                                    outline='red', width=2)
+        if self.start_x is not None and self.start_y is not None:
+            self.rect_id = self.canvas.create_rectangle(self.start_x - self.root.winfo_rootx(),
+                                                        self.start_y - self.root.winfo_rooty(),
+                                                        cur_x - self.root.winfo_rootx(),
+                                                        cur_y - self.root.winfo_rooty(),
+                                                        outline='red', width=2)
 
-    def on_button_release(self, event):
+    def on_button_release(self, event: tk.Event) -> None:
         end_x = self.root.winfo_pointerx()
         end_y = self.root.winfo_pointery()
-        selected_region = (min(self.start_x, end_x), min(self.start_y, end_y),
-                           max(self.start_x, end_x), max(self.start_y, end_y))
-        print(f"Selected Region: {selected_region}")  # Debugging the selected region
-        self.callback(selected_region)
+        if self.start_x is not None and self.start_y is not None:
+            selected_region = (min(self.start_x, end_x), min(self.start_y, end_y),
+                               max(self.start_x, end_x), max(self.start_y, end_y))
+            print(f"Selected Region: {selected_region}")  # Debugging the selected region
+            self.callback(selected_region)
         self.root.destroy()
 
-    def get_region(self):
+    def get_region(self) -> None:
         self.root.mainloop()
 
 
-def select_region(callback):
+def select_region(callback: Callable[[Tuple[int, int, int, int]], None]) -> None:
     region_window = tk.Toplevel()
     region_window.attributes("-fullscreen", True)
     region_window.attributes("-alpha", 0.3)  # Make the screen semi-transparent

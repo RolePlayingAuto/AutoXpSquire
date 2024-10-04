@@ -38,9 +38,10 @@ jobs:
         # E402: module level import not at top of file
         flake8 . --count --statistics --ignore=E402 --max-line-length 120
 
-    #- name: Type checking with mypy
-    #  run: |
-    #    mypy . --ignore-missing-imports
+    - name: Type checking with mypy
+      run: |
+        mypy . --ignore-missing-imports
+
     - name: Sort check with isort
       run: |
         isort . --diff
