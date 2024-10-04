@@ -187,7 +187,7 @@ def create_gui() -> None:
     # Skill tree frame with canvas and scrollbar
     subclass_notebook = ttk.Notebook(attack_settings_tab)
     subclass_notebook.pack(expand=1, fill="both")
-     
+
     def update_subclasses(*args: Any) -> None:
         # Clear previous widgets
         for tab in subclass_notebook.tabs():
