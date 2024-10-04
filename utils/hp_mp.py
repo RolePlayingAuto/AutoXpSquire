@@ -1,5 +1,6 @@
 import threading
 import time
+from typing import Any, List, Literal, Tuple
 
 import cv2
 import numpy as np
@@ -9,7 +10,8 @@ from PIL import ImageGrab
 stop_hp_mp_event = threading.Event()
 
 
-def calculate_bar_percentage(region, target_color_bgr):
+def calculate_bar_percentage(region: Tuple[int, int, int, int],
+                             target_color_bgr: List[int]) -> Any | Literal[0]:
     # Capture the region from the screen
     screenshot = ImageGrab.grab(bbox=region)
     image = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
@@ -42,7 +44,8 @@ def calculate_bar_percentage(region, target_color_bgr):
     return percentage
 
 
-def read_hp_mp(hp_bar_position, mp_bar_position):
+def read_hp_mp(hp_bar_position: Tuple[int, int, int, int],
+               mp_bar_position: Tuple[int, int, int, int]) -> Tuple[Any | Literal[0], Any | Literal[0]]:
     print(f"hp bar position {hp_bar_position} mp bar positon {mp_bar_position}")
     if hp_bar_position and mp_bar_position:
         hp_percentage = calculate_bar_percentage(hp_bar_position, [0, 0, 255])  # Red HP bar
@@ -56,11 +59,14 @@ def read_hp_mp(hp_bar_position, mp_bar_position):
 
 
 # Function to press the potion key
-def use_potion(key):
+def use_potion(key: Any) -> None:
     pydirectinput.press(key)
 
 
-def check_hp_mp(hp_threshold, mp_threshold, hp_bar_position, mp_bar_position, hp_pot_key, mp_pot_key):
+def check_hp_mp(hp_threshold: int, mp_threshold: int,
+                hp_bar_position: Tuple[int, int, int, int],
+                mp_bar_position: Tuple[int, int, int, int],
+                hp_pot_key: int, mp_pot_key: int) -> None:
     while not stop_hp_mp_event.is_set():
         hp_percentage, mp_percentage = read_hp_mp(hp_bar_position, mp_bar_position)
 
@@ -74,7 +80,7 @@ def check_hp_mp(hp_threshold, mp_threshold, hp_bar_position, mp_bar_position, hp
 
 
 # Start HP/MP check thread
-def start_hp_mp_check(config):
+def start_hp_mp_check(config: dict) -> threading.Thread | None:
     try:
         if config['hp_mp_check']:
             stop_hp_mp_event.clear()
@@ -86,13 +92,15 @@ def start_hp_mp_check(config):
             hp_mp_thread.start()
             print("HP/MP check started.")
             return hp_mp_thread
+        else:
+            return None
     except Exception as e:
         print(f"Exception in start_hp_mp_check {e}")
         return None
 
 
 # Stop HP/MP check
-def stop_hp_mp_check(hp_mp_thread):
+def stop_hp_mp_check(hp_mp_thread: threading.Thread) -> None:
     stop_hp_mp_event.set()
     hp_mp_thread.join()
     print("HP/MP check stopped.")

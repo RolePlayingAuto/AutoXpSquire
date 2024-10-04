@@ -4,7 +4,7 @@ import yaml
 from yaml import dump, safe_load
 
 
-def load_config(config_file="config/config.yml"):
+def load_config(config_file: str = "config/config.yml") -> dict:
     try:
         if not os.path.exists(config_file):
             raise FileNotFoundError(f"Config file {config_file} not found.")
@@ -58,7 +58,7 @@ def load_config(config_file="config/config.yml"):
         return {}
 
 
-def load_skill_data(skill_file="config/skilldata_config.yml"):
+def load_skill_data(skill_file: str = "config/skilldata_config.yml") -> dict:
     try:
         with open(skill_file, 'r') as file:
             skill_data = safe_load(file)
@@ -71,13 +71,11 @@ def load_skill_data(skill_file="config/skilldata_config.yml"):
         return {}
 
 
-def write_config_to_file(config, filename="config/config.yml"):
+def write_config_to_file(config: dict, filename: str = "config/config.yml") -> None:
     try:
         with open(filename, 'w') as file:
             dump(config, file, default_flow_style=False)
     except FileNotFoundError:
         print(f"Write config to file {filename} not found.")
-        return {}
     except Exception as e:
         print(f"Error Writing config file: {e}")
-        return {}
