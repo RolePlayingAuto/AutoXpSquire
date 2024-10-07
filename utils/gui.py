@@ -44,6 +44,7 @@ def create_gui() -> None:
     attack_checkbox = tk.Checkbutton(control_tab, text="Start Auto-Attack", variable=attack_var,
                                      command=lambda: config_variable_setter(shared.config, attack_var.get(),
                                                                             "auto_attack_toggle"))
+    attack_var.set(shared.config.get("auto_attack_toggle", False))
     attack_checkbox.pack()
 
     # HP and MP check checkbox
@@ -51,6 +52,7 @@ def create_gui() -> None:
     hp_mp_checkbox = tk.Checkbutton(control_tab, text="Enable HP/MP Check", variable=hp_mp_check_var,
                                     command=lambda: config_variable_setter(shared.config, hp_mp_check_var.get(),
                                                                            "hp_mp_check"))
+    hp_mp_check_var.set(shared.config.get("hp_mp_check", False))
     hp_mp_checkbox.pack()
 
     def config_variable_setter(config: dict, variable: Any, variable_name: str) -> None:
@@ -157,24 +159,6 @@ def create_gui() -> None:
     mp_pot_key_entry = tk.Entry(settings_frame, width=5)
     mp_pot_key_entry.insert(0, shared.config.get("mp_pot_key", '2'))
     mp_pot_key_entry.grid(row=1, column=3, padx=5, pady=5)
-
-    def save_settings() -> None:
-        try:
-            shared.config["hp_threshold"] = int(hp_percentage_entry.get())
-            shared.config["mp_threshold"] = int(mp_percentage_entry.get())
-            shared.config["hp_pot_key"] = hp_pot_key_entry.get()
-            shared.config["mp_pot_key"] = mp_pot_key_entry.get()
-            shared.config["window_name"] = window_name_entry.get()
-            write_config_to_file(shared.config)
-            tk.messagebox.showinfo("Settings", "Settings saved successfully.")
-        except ValueError:
-            tk.messagebox.showerror("Error", "Threshold values must be numeric.")
-        except Exception as e:
-            logger.error(f"Failed to save config settings: {e}")
-
-    save_hp_mp_button = tk.Button(hp_mp_tab, text="Save Settings", command=save_settings)
-    save_hp_mp_button.pack(pady=10)
-
     # Attack Settings Tab
     tk.Label(attack_settings_tab, text="Attack Settings", font=("Arial", 12)).pack(pady=10)
 
@@ -182,125 +166,122 @@ def create_gui() -> None:
     enable_basic_attack_var = tk.BooleanVar()
     enable_basic_attack_checkbox = tk.Checkbutton(attack_settings_tab, text="Enable R Attack",
                                                   variable=enable_basic_attack_var)
+    enable_basic_attack_var.set(shared.config["attack_settings"].get("enable_basic_attack", False))
     enable_basic_attack_checkbox.pack()
 
     # Class selection dropdown
     tk.Label(attack_settings_tab, text="Select Class:").pack(pady=4)
     selected_class = tk.StringVar()
+
+    selected_class.set(shared.config["attack_settings"].get("selected_class",
+                                                            shared.config["class_options"][0]
+                                                            if shared.config["class_options"] else ''))
     shared.config["class_options"] = list(skill_data.keys())
-    class_dropdown = ttk.Combobox(attack_settings_tab, textvariable=selected_class,
-                                  values=shared.config["class_options"])
+
+    # Create Combobox
+    class_dropdown = ttk.Combobox(attack_settings_tab,
+                                  textvariable=selected_class, values=shared.config["class_options"])
     class_dropdown.pack()
 
     # Skill tree frame with canvas and scrollbar
     subclass_notebook = ttk.Notebook(attack_settings_tab)
     subclass_notebook.pack(expand=1, fill="both")
 
-    def update_subclasses(*args: Any) -> None:
-        # Clear previous widgets
+    def update_subclasses(*args) -> None:
+        # Clean Old Widgets
         for tab in subclass_notebook.tabs():
             subclass_notebook.forget(tab)
 
         selected = selected_class.get()
+        logger.debug(f"Selected class: {selected}")
+
         if not selected or selected == 'None':
             logger.warning("No class selected in update_subclasses.")
             return
         if selected not in skill_data:
             logger.warning(f"Selected class '{selected}' not found in skill_data.")
             return
-        if selected:
-            shared.config["attack_settings"]["selected_class"] = selected
 
-            # For each subclass
-            for subclass in skill_data[selected]:
-                subclass_tab = ttk.Frame(subclass_notebook)
-                subclass_notebook.add(subclass_tab, text=subclass)
+        # Update subclasses
+        shared.config["attack_settings"]["selected_class"] = selected
 
-                skills = skill_data[selected][subclass]
+        for subclass in skill_data[selected]:
+            logger.debug(f"Loading subclass: {subclass}")
+            subclass_tab = ttk.Frame(subclass_notebook)
+            subclass_notebook.add(subclass_tab, text=subclass)
 
-                # Skill selection
-                for skill_name in skills:
-                    skill_frame = tk.Frame(subclass_tab)
-                    skill_frame.pack(fill=tk.X, padx=5, pady=2)
+            skills = skill_data[selected][subclass]
 
-                    skill_var = tk.BooleanVar()
-                    skill_checkbox = tk.Checkbutton(skill_frame, variable=skill_var)
-                    skill_checkbox.pack(side=tk.LEFT)
+            # Skill selection
+            for skill_name in skills:
+                skill_frame = tk.Frame(subclass_tab)
+                skill_frame.pack(fill=tk.X, padx=5, pady=2)
 
-                    # Skill icon (assuming icons are stored in 'static' folder)
-                    skill_icon_path = f"static/{selected.lower()}_{subclass.lower()}_{skill_name.lower()}.png"
-                    if os.path.exists(skill_icon_path):
-                        skill_image = tk.PhotoImage(file=skill_icon_path)
-                        skill_label: tk.Label = tk.Label(skill_frame, image=skill_image)
-                        skill_label.image = skill_image  # type: ignore[attr-defined] # Keep reference
-                        skill_label.pack(side=tk.LEFT, padx=5)
-                    else:
-                        # Placeholder if image not found
-                        skill_label = tk.Label(skill_frame, text=skill_name)
-                        skill_label.pack(side=tk.LEFT, padx=5)
+                skill_var = tk.BooleanVar()
+                skill_checkbox = tk.Checkbutton(skill_frame, variable=skill_var)
+                skill_checkbox.pack(side=tk.LEFT)
 
-                    # Skill name
-                    tk.Label(skill_frame, text=skill_name).pack(side=tk.LEFT, padx=5)
+                # Skill icon (assuming icons are stored in 'static' folder)
+                skill_icon_path = f"static/{selected.lower()}_{subclass.lower()}_{skill_name.lower()}.png"
+                if os.path.exists(skill_icon_path):
+                    skill_image = tk.PhotoImage(file=skill_icon_path)
+                    skill_label = tk.Label(skill_frame, image=skill_image)
+                    skill_label.image = skill_image  # type: ignore[attr-defined] # for keeping reference
+                    skill_label.pack(side=tk.LEFT, padx=5)
+                else:
+                    # Resim bulunamadığında placeholder
+                    skill_label = tk.Label(skill_frame, text=skill_name)
+                    skill_label.pack(side=tk.LEFT, padx=5)
 
-                    # Skill bar entry
-                    tk.Label(skill_frame, text="Skill Bar:").pack(side=tk.LEFT, padx=5)
-                    skill_bar_entry = tk.Entry(skill_frame, width=3)
-                    skill_bar_entry.pack(side=tk.LEFT, padx=5)
+                # Skill name
+                tk.Label(skill_frame, text=skill_name).pack(side=tk.LEFT, padx=5)
 
-                    # Slot number entry
-                    tk.Label(skill_frame, text="Slot:").pack(side=tk.LEFT, padx=5)
-                    slot_entry = tk.Entry(skill_frame, width=3)
-                    slot_entry.pack(side=tk.LEFT, padx=5)
+                # Skill bar entry
+                tk.Label(skill_frame, text="Skill Bar:").pack(side=tk.LEFT, padx=5)
+                skill_bar_entry = tk.Entry(skill_frame, width=3)
+                skill_bar_entry.pack(side=tk.LEFT, padx=5)
 
-                    # Load saved skill settings if available
-                    saved_skill = next(
-                        (
-                            s for s in shared.config["attack_settings"].get("skills", [])
-                            if s["name"] == skill_name
-                        ),
-                        None
-                    )
-                    if saved_skill:
-                        skill_var.set(saved_skill["enabled"])
-                        skill_bar_entry.insert(0, saved_skill["skill_bar"])
-                        slot_entry.insert(0, saved_skill["slot"])
+                # Slot number entry
+                tk.Label(skill_frame, text="Slot:").pack(side=tk.LEFT, padx=5)
+                slot_entry = tk.Entry(skill_frame, width=3)
+                slot_entry.pack(side=tk.LEFT, padx=5)
 
-                    # Save skill settings
-                    def save_skill(skill_name=skill_name, subclass=subclass,
-                                   skill_var=skill_var, skill_bar_entry=skill_bar_entry, slot_entry=slot_entry):
-                        skill_info = {
-                            "name": skill_name,
-                            "subclass": subclass,
-                            "enabled": skill_var.get(),
-                            "skill_bar": skill_bar_entry.get(),
-                            "slot": slot_entry.get()
-                        }
-                        # Remove any existing entry with this skill name
-                        shared.config["attack_settings"]["skills"] = [
-                            s for s in shared.config["attack_settings"]["skills"]
-                            if s["name"] != skill_name
-                        ]
-                        # Add the updated skill info
-                        shared.config["attack_settings"]["skills"].append(skill_info)
+                # Load saved skill settings if available
+                saved_skill = next(
+                    (s for s in shared.config["attack_settings"].get("skills", []) if s["name"] == skill_name),
+                    None
+                )
+                if saved_skill:
+                    logger.debug(f"Loading saved skill: {saved_skill}")
+                    skill_var.set(saved_skill["enabled"])
+                    skill_bar_entry.insert(0, saved_skill["skill_bar"])
+                    slot_entry.insert(0, saved_skill["slot"])
 
-                    # Bind save on change
-                    skill_var.trace_add("write",
-                                        lambda *args, save_skill=save_skill: save_skill())  # type: ignore[misc]
-                    skill_bar_entry.bind("<FocusOut>",
-                                         lambda e, save_skill=save_skill: save_skill())  # type: ignore[misc]
-                    slot_entry.bind("<FocusOut>",
-                                    lambda e, save_skill=save_skill: save_skill())  # type: ignore[misc]
+                # Save skill settings
+                def save_skill(skill_name=skill_name, subclass=subclass, skill_var=skill_var,
+                               skill_bar_entry=skill_bar_entry, slot_entry=slot_entry) -> None:
+                    skill_info = {
+                        "name": skill_name,
+                        "subclass": subclass,
+                        "enabled": skill_var.get(),
+                        "skill_bar": skill_bar_entry.get(),
+                        "slot": slot_entry.get()
+                    }
+                    # Remove any existing entry with this skill name
+                    shared.config["attack_settings"]["skills"] = [
+                        s for s in shared.config["attack_settings"]["skills"]
+                        if s["name"] != skill_name
+                    ]
+                    # Add the updated skill info
+                    shared.config["attack_settings"]["skills"].append(skill_info)
+
+                # Bind save on change
+                skill_var.trace_add("write", lambda *args, save_skill=save_skill: save_skill())  # type: ignore[misc]
+                skill_bar_entry.bind("<FocusOut>", lambda e, save_skill=save_skill: save_skill())  # type: ignore[misc]
+                slot_entry.bind("<FocusOut>", lambda e, save_skill=save_skill: save_skill())  # type: ignore[misc]
 
     selected_class.trace_add("write", update_subclasses)
-
-    # Save attack settings button
-    def save_attack_settings() -> None:
-        shared.config["attack_settings"]["enable_basic_attack"] = enable_basic_attack_var.get()
-        tk.messagebox.showinfo("Settings", "Attack settings saved.")
-
-    save_attack_settings_button = tk.Button(attack_settings_tab, text="Save Attack Settings",
-                                            command=save_attack_settings)
-    save_attack_settings_button.pack(pady=10)
+    update_subclasses()
 
     # Configuration save/load buttons
     def load_configuration() -> None:
@@ -372,8 +353,28 @@ def create_gui() -> None:
         write_config_to_file(shared.config)
         tk.messagebox.showinfo("Settings", "Configuration saved successfully.")
 
+    def save_settings() -> None:
+        try:
+            shared.config["hp_threshold"] = int(hp_percentage_entry.get())
+            shared.config["mp_threshold"] = int(mp_percentage_entry.get())
+            shared.config["hp_pot_key"] = hp_pot_key_entry.get()
+            shared.config["mp_pot_key"] = mp_pot_key_entry.get()
+            shared.config["window_name"] = window_name_entry.get()
+            shared.config["attack_settings"]["enable_basic_attack"] = enable_basic_attack_var.get()
+            write_config_to_file(shared.config)
+            tk.messagebox.showinfo("Settings", "Settings saved successfully.")
+            logger.info("Settings Saved Successfully")
+        except ValueError:
+            tk.messagebox.showerror("Error", "Threshold values must be numeric.")
+            logger.error("Settings Not Saved Threshold values must be numeric.")
+        except Exception as e:
+            logger.error(f"Failed to save config settings: {e}")
+
     config_frame = tk.Frame(window)
     config_frame.pack(pady=5)
+
+    save_all_settings_button = tk.Button(config_frame, text="Save Settings", command=save_settings)
+    save_all_settings_button.pack(pady=10)
 
     save_config_button = tk.Button(config_frame, text="Save Configuration", command=save_configuration)
     save_config_button.pack(side=tk.LEFT, padx=5)

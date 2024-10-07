@@ -29,5 +29,5 @@ logger.addHandler(file_handler)
 logger.addHandler(console_handler)
 
 
-def get_logger(name):
+def get_logger(name) -> logging.Logger:
     return logging.getLogger(name)
