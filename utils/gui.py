@@ -117,6 +117,12 @@ def create_gui() -> None:
     mp_coord_label = tk.Label(hp_mp_tab, text="MP Bar Coordinates: Not Selected")
     mp_coord_label.pack(pady=5)
 
+    if "hp_bar_position" in shared.config:
+        hp_coord_label.config(text=f"HP Bar Coordinates: {shared.config['hp_bar_position']}")
+
+    if "mp_bar_position" in shared.config:
+        mp_coord_label.config(text=f"MP Bar Coordinates: {shared.config['mp_bar_position']}")
+
     # HP and MP coordinate update functions
     def update_hp_bar_position(region: Tuple[int, int, int, int]) -> None:
         shared.config["hp_bar_position"] = region
