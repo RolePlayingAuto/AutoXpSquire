@@ -226,7 +226,7 @@ def create_gui() -> None:
                 if os.path.exists(skill_icon_path):
                     skill_image = tk.PhotoImage(file=skill_icon_path)
                     skill_label = tk.Label(skill_frame, image=skill_image)
-                    skill_label.image = skill_image  # Referans tutmak için
+                    skill_label.image = skill_image  # type: ignore[attr-defined] # for keeping reference
                     skill_label.pack(side=tk.LEFT, padx=5)
                 else:
                     # Resim bulunamadığında placeholder
@@ -276,9 +276,9 @@ def create_gui() -> None:
                     shared.config["attack_settings"]["skills"].append(skill_info)
 
                 # Bind save on change
-                skill_var.trace_add("write", lambda *args, save_skill=save_skill: save_skill())
-                skill_bar_entry.bind("<FocusOut>", lambda e, save_skill=save_skill: save_skill())
-                slot_entry.bind("<FocusOut>", lambda e, save_skill=save_skill: save_skill())
+                skill_var.trace_add("write", lambda *args, save_skill=save_skill: save_skill())  # type: ignore[misc]
+                skill_bar_entry.bind("<FocusOut>", lambda e, save_skill=save_skill: save_skill())  # type: ignore[misc]
+                slot_entry.bind("<FocusOut>", lambda e, save_skill=save_skill: save_skill())  # type: ignore[misc]
 
     selected_class.trace_add("write", update_subclasses)
     update_subclasses()
