@@ -6,6 +6,7 @@ from utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+
 def load_config(config_file: str = "config/config.yml") -> dict:
     try:
         if not os.path.exists(config_file):
