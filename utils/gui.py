@@ -173,18 +173,21 @@ def create_gui() -> None:
     tk.Label(attack_settings_tab, text="Select Class:").pack(pady=4)
     selected_class = tk.StringVar()
 
-    selected_class.set(shared.config["attack_settings"].get("selected_class", shared.config["class_options"][0] if shared.config["class_options"] else ''))
+    selected_class.set(shared.config["attack_settings"].get("selected_class",
+                                                            shared.config["class_options"][0]
+                                                            if shared.config["class_options"] else ''))
     shared.config["class_options"] = list(skill_data.keys())
 
     # Create Combobox
-    class_dropdown = ttk.Combobox(attack_settings_tab, textvariable=selected_class, values=shared.config["class_options"])
+    class_dropdown = ttk.Combobox(attack_settings_tab,
+                                  textvariable=selected_class, values=shared.config["class_options"])
     class_dropdown.pack()
 
     # Skill tree frame with canvas and scrollbar
     subclass_notebook = ttk.Notebook(attack_settings_tab)
     subclass_notebook.pack(expand=1, fill="both")
 
-    def update_subclasses(*args):
+    def update_subclasses(*args) -> None:
         # Clean Old Widgets
         for tab in subclass_notebook.tabs():
             subclass_notebook.forget(tab)
@@ -255,7 +258,8 @@ def create_gui() -> None:
                     slot_entry.insert(0, saved_skill["slot"])
 
                 # Save skill settings
-                def save_skill(skill_name=skill_name, subclass=subclass, skill_var=skill_var, skill_bar_entry=skill_bar_entry, slot_entry=slot_entry):
+                def save_skill(skill_name=skill_name, subclass=subclass, skill_var=skill_var,
+                               skill_bar_entry=skill_bar_entry, slot_entry=slot_entry) -> None:
                     skill_info = {
                         "name": skill_name,
                         "subclass": subclass,
