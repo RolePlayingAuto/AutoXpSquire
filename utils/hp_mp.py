@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 import pydirectinput
 from PIL import ImageGrab
+
 from utils.logger import get_logger
 
 logger = get_logger(__name__)

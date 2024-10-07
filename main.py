@@ -7,7 +7,6 @@ from utils.hp_mp import start_hp_mp_check, stop_hp_mp_check
 from utils.loader import load_config
 from utils.logger import get_logger
 
-
 logger = get_logger(__name__)
 
 
