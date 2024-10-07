@@ -7,6 +7,9 @@ import numpy as np
 import pydirectinput
 from PIL import ImageGrab
 
+from utils.logger import get_logger
+
+logger = get_logger(__name__)
 stop_hp_mp_event = threading.Event()
 
 
@@ -46,13 +49,13 @@ def calculate_bar_percentage(region: Tuple[int, int, int, int],
 
 def read_hp_mp(hp_bar_position: Tuple[int, int, int, int],
                mp_bar_position: Tuple[int, int, int, int]) -> Tuple[Any | Literal[0], Any | Literal[0]]:
-    print(f"hp bar position {hp_bar_position} mp bar positon {mp_bar_position}")
+    logger.info(f"hp bar position {hp_bar_position} mp bar positon {mp_bar_position}")
     if hp_bar_position and mp_bar_position:
         hp_percentage = calculate_bar_percentage(hp_bar_position, [0, 0, 255])  # Red HP bar
         mp_percentage = calculate_bar_percentage(mp_bar_position, [255, 0, 0])  # Blue MP bar
 
-        print(f"HP Percentage: {hp_percentage:.2f}%")
-        print(f"MP Percentage: {mp_percentage:.2f}%")
+        logger.info(f"HP Percentage: {hp_percentage:.2f}%")
+        logger.info(f"MP Percentage: {mp_percentage:.2f}%")
 
         return hp_percentage, mp_percentage
     return None, None
@@ -90,12 +93,12 @@ def start_hp_mp_check(config: dict) -> threading.Thread | None:
                       config["mp_bar_position"], config["hp_pot_key"], config["mp_pot_key"])
             )
             hp_mp_thread.start()
-            print("HP/MP check started.")
+            logger.info("HP/MP check started.")
             return hp_mp_thread
         else:
             return None
     except Exception as e:
-        print(f"Exception in start_hp_mp_check {e}")
+        logger.error(f"Exception in start_hp_mp_check {e}")
         return None
 
 
@@ -103,5 +106,5 @@ def start_hp_mp_check(config: dict) -> threading.Thread | None:
 def stop_hp_mp_check(hp_mp_thread: threading.Thread) -> None:
     stop_hp_mp_event.set()
     hp_mp_thread.join()
-    print("HP/MP check stopped.")
+    logger.info("HP/MP check stopped.")
     return None

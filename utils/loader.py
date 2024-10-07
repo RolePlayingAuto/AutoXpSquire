@@ -3,6 +3,10 @@ import os
 import yaml
 from yaml import dump, safe_load
 
+from utils.logger import get_logger
+
+logger = get_logger(__name__)
+
 
 def load_config(config_file: str = "config/config.yml") -> dict:
     try:
@@ -51,10 +55,10 @@ def load_config(config_file: str = "config/config.yml") -> dict:
         }
 
     except FileNotFoundError:
-        print(f"Config file {config_file} not found.")
+        logger.error(f"Config file {config_file} not found.")
         return {}
     except Exception as e:
-        print(f"Error loading config file: {e}")
+        logger.error(f"Error loading config file: {e}")
         return {}
 
 
@@ -64,10 +68,10 @@ def load_skill_data(skill_file: str = "config/skilldata_config.yml") -> dict:
             skill_data = safe_load(file)
         return skill_data
     except FileNotFoundError:
-        print(f"Skill data file {skill_file} not found.")
+        logger.error(f"Skill data file {skill_file} not found.")
         return {}
     except Exception as e:
-        print(f"Error loading skill data: {e}")
+        logger.error(f"Error loading skill data: {e}")
         return {}
 
 
@@ -76,6 +80,6 @@ def write_config_to_file(config: dict, filename: str = "config/config.yml") -> N
         with open(filename, 'w') as file:
             dump(config, file, default_flow_style=False)
     except FileNotFoundError:
-        print(f"Write config to file {filename} not found.")
+        logger.error(f"Write config to file {filename} not found.")
     except Exception as e:
-        print(f"Error Writing config file: {e}")
+        logger.error(f"Error Writing config file: {e}")

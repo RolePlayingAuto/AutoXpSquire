@@ -3,6 +3,9 @@ import time
 
 import pydirectinput
 
+from utils.logger import get_logger
+
+logger = get_logger(__name__)
 auto_attack = False
 
 
@@ -24,7 +27,7 @@ def auto_attack_function(config: dict) -> None:
             # Execute selected skills
             for skill in attack_settings.get("skills", []):
                 if skill["enabled"]:
-                    print(f"Attempting skill: {skill['name']}")
+                    logger.info(f"Attempting skill: {skill['name']}")
                     # Switch to the specified skill bar
                     pydirectinput.press(skill["skill_bar"])
                     time.sleep(0.1)
@@ -39,7 +42,7 @@ def auto_attack_function(config: dict) -> None:
             # Increase delay between skill activations
             time.sleep(1)
         else:
-            print("Target window not found.")
+            logger.error("Target window not found.")
             break
 
 
@@ -48,16 +51,16 @@ def start_auto_attack(config: dict) -> threading.Thread | None:
         if config['auto_attack_toggle']:
             attack_thread = threading.Thread(target=auto_attack_function, args=(config,))
             attack_thread.start()
-            print("Auto-attack started.")
+            logger.info("Auto-attack started.")
             return attack_thread
         else:
             return None
     except Exception as e:
-        print(f"Exception in start_auto_attack {e}")
+        logger.error(f"Exception in start_auto_attack {e}")
         return None
 
 
 def stop_auto_attack(thread: threading.Thread) -> None:
     thread.join()
-    print("Auto-attack stopped.")
+    logger.info("Auto-attack stopped.")
     return None
