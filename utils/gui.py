@@ -52,7 +52,7 @@ def create_gui() -> None:
     hp_mp_checkbox = tk.Checkbutton(control_tab, text="Enable HP/MP Check", variable=hp_mp_check_var,
                                     command=lambda: config_variable_setter(shared.config, hp_mp_check_var.get(),
                                                                            "hp_mp_check"))
-    attack_var.set(shared.config.get("hp_mp_check", False))
+    hp_mp_check_var.set(shared.config.get("hp_mp_check", False))
     hp_mp_checkbox.pack()
 
     def config_variable_setter(config: dict, variable: Any, variable_name: str) -> None:
