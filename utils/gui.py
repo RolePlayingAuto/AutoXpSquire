@@ -11,7 +11,9 @@ import utils.shared as shared
 from utils.auto_attack import start_auto_attack, stop_auto_attack
 from utils.hp_mp import start_hp_mp_check, stop_hp_mp_check
 from utils.loader import load_skill_data, write_config_to_file
+from utils.logger import get_logger
 
+logger = get_logger(__name__)
 # Globals
 target_window = None
 
@@ -53,14 +55,14 @@ def create_gui() -> None:
 
     def config_variable_setter(config: dict, variable: Any, variable_name: str) -> None:
         config[variable_name] = variable
-        print(f"Config value {variable_name} has been set to: {variable}")
+        logger.info(f"Config value {variable_name} has been set to: {variable}")
 
     def start_bot() -> None:
         global target_window
         target_window = find_window(shared.config["window_name"])
 
         if target_window is None:
-            print(f"{shared.config['window_name']} window not found!")
+            logger.info(f"{shared.config['window_name']} window not found!")
             return
 
         # Bring the game window to the front
@@ -70,18 +72,18 @@ def create_gui() -> None:
             shared.auto_attack_thread = start_auto_attack(shared.config)
         if hp_mp_check_var.get():
             shared.hp_mp_check_thread = start_hp_mp_check(shared.config)
-        print("Bot started.")
+        logger.info("Bot started.")
 
     def stop_bot() -> None:
         if shared.auto_attack_thread:
-            print("Auto attack thread found, stopping auto attack")
+            logger.info("Auto attack thread found, stopping auto attack")
             stop_auto_attack(shared.auto_attack_thread)
             shared.auto_attack_thread = None
         if shared.hp_mp_check_thread:
-            print("hp_mp_check thread found, stopping hp_mp_check")
+            logger.info("hp_mp_check thread found, stopping hp_mp_check")
             stop_hp_mp_check(shared.hp_mp_check_thread)
             shared.hp_mp_check_thread = None
-        print("Bot stopped")
+        logger.info("Bot stopped")
 
     start_button = tk.Button(control_tab, text="Start Bot", command=start_bot)
     start_button.pack(pady=5)
@@ -168,7 +170,7 @@ def create_gui() -> None:
         except ValueError:
             tk.messagebox.showerror("Error", "Threshold values must be numeric.")
         except Exception as e:
-            print(f"Failed to save config settings: {e}")
+            logger.error(f"Failed to save config settings: {e}")
 
     save_hp_mp_button = tk.Button(hp_mp_tab, text="Save Settings", command=save_settings)
     save_hp_mp_button.pack(pady=10)
@@ -201,10 +203,10 @@ def create_gui() -> None:
 
         selected = selected_class.get()
         if not selected or selected == 'None':
-            print("No class selected in update_subclasses.")
+            logger.warning("No class selected in update_subclasses.")
             return
         if selected not in skill_data:
-            print(f"Selected class '{selected}' not found in skill_data.")
+            logger.warning(f"Selected class '{selected}' not found in skill_data.")
             return
         if selected:
             shared.config["attack_settings"]["selected_class"] = selected
@@ -387,7 +389,7 @@ def find_window(window_title: str) -> Optional[Any]:
     if windows:
         return windows[0]
     else:
-        print(f"Window named {window_title} not found!")
+        logger.warning(f"Window named {window_title} not found!")
         return None
 
 
@@ -430,7 +432,7 @@ class RegionSelector:
         if self.start_x is not None and self.start_y is not None:
             selected_region = (min(self.start_x, end_x), min(self.start_y, end_y),
                                max(self.start_x, end_x), max(self.start_y, end_y))
-            print(f"Selected Region: {selected_region}")  # Debugging the selected region
+            logger.info(f"Selected Region: {selected_region}")  # Debugging the selected region
             self.callback(selected_region)
         self.root.destroy()
 
