@@ -1,3 +1,4 @@
+import ctypes
 import json
 import os
 import time
@@ -16,6 +17,7 @@ from utils.logger import get_logger
 logger = get_logger(__name__)
 # Globals
 target_window = None
+ctypes.windll.shcore.SetProcessDpiAwareness(2)
 
 
 def create_gui() -> None:
@@ -410,26 +412,26 @@ class RegionSelector:
         self.canvas.bind("<ButtonRelease-1>", self.on_button_release)
 
     def on_button_press(self, event: tk.Event) -> None:
-        self.start_x = self.root.winfo_pointerx()
-        self.start_y = self.root.winfo_pointery()
+        self.start_x = self.root.winfo_pointerx() - self.root.winfo_rootx()
+        self.start_y = self.root.winfo_pointery() - self.root.winfo_rooty()
         if self.rect_id:
             self.canvas.delete(self.rect_id)
 
     def on_mouse_drag(self, event: tk.Event) -> None:
-        cur_x = self.root.winfo_pointerx()
-        cur_y = self.root.winfo_pointery()
+        cur_x = self.root.winfo_pointerx() - self.root.winfo_rootx()
+        cur_y = self.root.winfo_pointery() - self.root.winfo_rooty()
         if self.rect_id:
             self.canvas.delete(self.rect_id)
         if self.start_x is not None and self.start_y is not None:
-            self.rect_id = self.canvas.create_rectangle(self.start_x - self.root.winfo_rootx(),
-                                                        self.start_y - self.root.winfo_rooty(),
-                                                        cur_x - self.root.winfo_rootx(),
-                                                        cur_y - self.root.winfo_rooty(),
+            self.rect_id = self.canvas.create_rectangle(self.start_x,
+                                                        self.start_y,
+                                                        cur_x,
+                                                        cur_y,
                                                         outline='red', width=2)
 
     def on_button_release(self, event: tk.Event) -> None:
-        end_x = self.root.winfo_pointerx()
-        end_y = self.root.winfo_pointery()
+        end_x = self.root.winfo_pointerx() - self.root.winfo_rootx()
+        end_y = self.root.winfo_pointery() - self.root.winfo_rooty()
         if self.start_x is not None and self.start_y is not None:
             selected_region = (min(self.start_x, end_x), min(self.start_y, end_y),
                                max(self.start_x, end_x), max(self.start_y, end_y))
