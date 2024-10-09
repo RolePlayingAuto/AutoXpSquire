@@ -53,9 +53,9 @@ def read_hp_mp(hp_bar_position: Tuple[int, int, int, int],
     if hp_bar_position and mp_bar_position:
         hp_percentage = calculate_bar_percentage(hp_bar_position, [0, 0, 255])  # Red HP bar
         mp_percentage = calculate_bar_percentage(mp_bar_position, [255, 0, 0])  # Blue MP bar
-
-        logger.info(f"HP Percentage: {hp_percentage:.2f}%")
-        logger.info(f"MP Percentage: {mp_percentage:.2f}%")
+        # enable these logs in need of debugging
+        # logger.debug(f"HP Percentage: {hp_percentage:.2f}%")
+        # logger.debug(f"MP Percentage: {mp_percentage:.2f}%")
 
         return hp_percentage, mp_percentage
     return None, None
@@ -75,9 +75,11 @@ def check_hp_mp(hp_threshold: int, mp_threshold: int,
 
         if hp_percentage is not None and mp_percentage is not None:
             if hp_percentage <= hp_threshold:
+                logger.info(f"HP below threshold: {hp_percentage:.2f}%, using HP potion.")
                 use_potion(hp_pot_key)
 
             if mp_percentage <= mp_threshold:
+                logger.info(f"MP below threshold: {mp_percentage:.2f}%, using MP potion.")
                 use_potion(mp_pot_key)
         time.sleep(0.5)  # Reduced sleep time for faster response
 
