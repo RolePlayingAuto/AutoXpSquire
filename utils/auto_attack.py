@@ -11,29 +11,27 @@ stop_auto_attack_event = threading.Event()
 
 def auto_attack_function(config: dict) -> None:
     attack_settings = config["attack_settings"]
+    enabled_skills = [skill for skill in attack_settings.get("skills", []) if skill["enabled"]]
     while config['auto_attack_toggle'] and not stop_auto_attack_event.is_set():
         # Continuously press 'Z' to target
         pydirectinput.press('z')
-        time.sleep(0.1)
+        time.sleep(0.01)
 
         # Continuously press 'R' if enabled
         if attack_settings.get("enable_basic_attack", False):
             pydirectinput.press('r')
 
         # Execute selected skills
-        for skill in attack_settings.get("skills", []):
-            if skill["enabled"]:
-                logger.info(f"Attempting skill: {skill['name']}")
-                # Switch to the specified skill bar
-                pydirectinput.press(skill["skill_bar"])
-                # Press the skill slot key
-                pydirectinput.press(skill["slot"])
-                # Continuously press 'R' if enabled
-                if attack_settings.get("enable_basic_attack", False):
-                    pydirectinput.press('r')
+        for skill in enabled_skills:
+            logger.info(f"Attempting skill: {skill['name']}")
+            pydirectinput.press(skill["skill_bar"])
+            pydirectinput.press(skill["slot"])
+            # Continuously press 'R' if enabled
+            if attack_settings.get("enable_basic_attack", False):
+                pydirectinput.press('r')
 
             # Increase delay between skill activations
-            time.sleep(0.2)
+            time.sleep(0.15)
 
 
 def start_auto_attack(config: dict) -> threading.Thread | None:

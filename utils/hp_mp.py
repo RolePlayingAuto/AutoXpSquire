@@ -49,13 +49,12 @@ def calculate_bar_percentage(region: Tuple[int, int, int, int],
 
 def read_hp_mp(hp_bar_position: Tuple[int, int, int, int],
                mp_bar_position: Tuple[int, int, int, int]) -> Tuple[Any | Literal[0], Any | Literal[0]]:
-    logger.info(f"hp bar position {hp_bar_position} mp bar positon {mp_bar_position}")
+    logger.debug(f"hp bar position {hp_bar_position} mp bar positon {mp_bar_position}")
     if hp_bar_position and mp_bar_position:
         hp_percentage = calculate_bar_percentage(hp_bar_position, [0, 0, 255])  # Red HP bar
         mp_percentage = calculate_bar_percentage(mp_bar_position, [255, 0, 0])  # Blue MP bar
-        # enable these logs in need of debugging
-        # logger.debug(f"HP Percentage: {hp_percentage:.2f}%")
-        # logger.debug(f"MP Percentage: {mp_percentage:.2f}%")
+        logger.debug(f"HP Percentage: {hp_percentage:.2f}%")
+        logger.debug(f"MP Percentage: {mp_percentage:.2f}%")
 
         return hp_percentage, mp_percentage
     return None, None
