@@ -1,4 +1,3 @@
-import ctypes
 import json
 import os
 import time
@@ -17,7 +16,6 @@ from utils.logger import get_logger
 logger = get_logger(__name__)
 # Globals
 target_window = None
-ctypes.windll.shcore.SetProcessDpiAwareness(2)
 
 
 def create_gui() -> None:
