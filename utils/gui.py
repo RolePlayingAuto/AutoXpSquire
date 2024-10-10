@@ -473,7 +473,7 @@ def add_scrollable_frame(tab: ttk.Frame) -> ttk.Frame:
     canvas.configure(yscrollcommand=scrollbar.set)
 
     # Update the scrollregion when the frame changes its size
-    def on_frame_configure(event) -> None:
+    def on_frame_configure(event: tk.Event) -> None:
         canvas.configure(scrollregion=canvas.bbox("all"))
 
     scrollable_frame.bind("<Configure>", on_frame_configure)
