@@ -17,10 +17,6 @@ def auto_attack_function(config: dict) -> None:
         pydirectinput.press('z')
         time.sleep(0.01)
 
-        # Continuously press 'R' if enabled
-        if attack_settings.get("enable_basic_attack", False):
-            pydirectinput.press('r')
-
         # Execute selected skills
         for skill in enabled_skills:
             logger.info(f"Attempting skill: {skill['name']}")
@@ -29,7 +25,7 @@ def auto_attack_function(config: dict) -> None:
             # Continuously press 'R' if enabled
             if attack_settings.get("enable_basic_attack", False):
                 pydirectinput.press('r')
-
+            pydirectinput.press('z')
             # Increase delay between skill activations
             time.sleep(0.15)
 
