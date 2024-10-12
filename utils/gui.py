@@ -359,12 +359,12 @@ def create_gui() -> None:
                 if os.path.exists(skill_icon_path):
                     skill_image = tk.PhotoImage(file=skill_icon_path)
                     skill_label = tk.Label(skill_frame, image=skill_image)
-                    skill_label.image = skill_image  # type: ignore[attr-defined] # for keeping reference
-                    skill_label.pack(side=tk.LEFT, padx=5)
+                    skill_label.image = skill_image  # type: ignore[attr-defined] # Keep a reference
+                    skill_label.grid(row=0, column=1, padx=5, sticky='w')  # Use grid() instead of pack()
                 else:
                     # Placeholder if image not found
-                    skill_label = tk.Label(skill_frame, text="", font=("Arial", 10))
-                    skill_label.grid(row=0, column=1, padx=5)
+                    skill_label = tk.Label(skill_frame, text=skill_name, font=("Arial", 10))
+                    skill_label.grid(row=0, column=1, padx=5, sticky='w')
 
                 # Skill name
                 tk.Label(skill_frame, text=skill_name, font=("Arial", 10)).grid(row=0, column=2, padx=5, sticky='w')
