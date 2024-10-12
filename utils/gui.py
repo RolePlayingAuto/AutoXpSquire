@@ -33,28 +33,44 @@ def create_gui() -> None:
     tab_control.pack(expand=1, fill="both")
 
     # Control Tab
-    tk.Label(control_tab, text="AutoXpSquire Bot Control", font=("Arial", 14)).pack(pady=10)
-    scrollable_control_frame = add_scrollable_frame(control_tab)
-    tk.Label(scrollable_control_frame, text="Game Window Name:").pack()
-    window_name_entry = tk.Entry(scrollable_control_frame)
-    window_name_entry.pack()
-    window_name_entry.insert(0, shared.config.get('window_name', ''))
+    tk.Label(control_tab, text="AutoXpSquire Bot Control", font=("Arial", 14, "bold")).pack(pady=10)
+    control_frame = tk.Frame(control_tab)
+    control_frame.pack(fill="both", expand=True)
+
+    # Configure columns for better alignment
+    control_frame.columnconfigure(0, weight=1)
+    control_frame.columnconfigure(1, weight=1)
+
+    # Use grid layout for better alignment
+    row = 0
+    tk.Label(control_frame, text="Game Window Name:", font=("Arial", 10, "bold")).grid(row=row, column=0, sticky='e', padx=5, pady=5)
+    window_name_entry = tk.Entry(control_frame)
+    window_name_entry.grid(row=row, column=1, sticky='w', padx=5, pady=5)
+    row += 1
 
     # Auto-attack checkbox
     attack_var = tk.BooleanVar()
-    attack_checkbox = tk.Checkbutton(scrollable_control_frame, text="Start Auto-Attack", variable=attack_var,
-                                     command=lambda: config_variable_setter(shared.config, attack_var.get(),
-                                                                            "auto_attack_toggle"))
+    attack_checkbox = tk.Checkbutton(
+        control_frame,
+        text="Start Auto-Attack",
+        variable=attack_var,
+        command=lambda: config_variable_setter(shared.config, attack_var.get(), "auto_attack_toggle")
+    )
     attack_var.set(shared.config.get("auto_attack_toggle", False))
-    attack_checkbox.pack()
+    attack_checkbox.grid(row=row, column=0, columnspan=2, sticky='', padx=5, pady=5)
+    row += 1
 
     # HP and MP check checkbox
     hp_mp_check_var = tk.BooleanVar()
-    hp_mp_checkbox = tk.Checkbutton(scrollable_control_frame, text="Enable HP/MP Check", variable=hp_mp_check_var,
-                                    command=lambda: config_variable_setter(shared.config, hp_mp_check_var.get(),
-                                                                           "hp_mp_check"))
+    hp_mp_checkbox = tk.Checkbutton(
+        control_frame,
+        text="Enable HP/MP Check",
+        variable=hp_mp_check_var,
+        command=lambda: config_variable_setter(shared.config, hp_mp_check_var.get(), "hp_mp_check")
+    )
     hp_mp_check_var.set(shared.config.get("hp_mp_check", False))
-    hp_mp_checkbox.pack()
+    hp_mp_checkbox.grid(row=row, column=0, columnspan=2, sticky='', padx=5, pady=5)
+    row += 1
 
     def config_variable_setter(config: dict, variable: Any, variable_name: str) -> None:
         config[variable_name] = variable
@@ -88,11 +104,12 @@ def create_gui() -> None:
             shared.hp_mp_check_thread = None
         logger.info("Bot stopped")
 
-    start_button = tk.Button(scrollable_control_frame, text="Start Bot", command=start_bot)
-    start_button.pack(pady=5)
-
-    stop_button = tk.Button(scrollable_control_frame, text="Stop Bot", command=stop_bot)
-    stop_button.pack(pady=5)
+    # Start and Stop buttons
+    start_button = tk.Button(control_frame, text="Start Bot", command=start_bot)
+    start_button.grid(row=row, column=0, padx=5, pady=5, sticky='e')
+    stop_button = tk.Button(control_frame, text="Stop Bot", command=stop_bot)
+    stop_button.grid(row=row, column=1, padx=5, pady=5, sticky='w')
+    row += 1
 
     # Settings Tab with sub-tabs
     settings_notebook = ttk.Notebook(settings_tab)
@@ -104,24 +121,40 @@ def create_gui() -> None:
     settings_notebook.add(other_settings_tab, text="Other Settings")
 
     # HP/MP Tab content
-    tk.Label(hp_mp_tab, text="HP/MP Settings", font=("Arial", 12)).pack(pady=10)
-    scrollable_hp_mp_frame = add_scrollable_frame(hp_mp_tab)
+    tk.Label(hp_mp_tab, text="HP/MP Settings", font=("Arial", 12, "bold")).pack(pady=10)
+    hp_mp_frame = tk.Frame(hp_mp_tab)
+    hp_mp_frame.pack(fill="both", expand=True)
 
-    # HP and MP bar selection buttons
-    set_hp_button = tk.Button(scrollable_hp_mp_frame, text="Select HP Bar Region",
-                              command=lambda: select_region(update_hp_bar_position))
-    set_hp_button.pack(pady=5)
+    # Configure columns
+    hp_mp_frame.columnconfigure(0, weight=1)
+    hp_mp_frame.columnconfigure(1, weight=1)
 
-    set_mp_button = tk.Button(scrollable_hp_mp_frame, text="Select MP Bar Region",
-                              command=lambda: select_region(update_mp_bar_position))
-    set_mp_button.pack(pady=5)
+    row = 0
+    set_hp_button = tk.Button(
+        hp_mp_frame,
+        text="Select HP Bar Region",
+        font=("Arial", 10, "bold"),
+        command=lambda: select_region(update_hp_bar_position)
+    )
+    set_hp_button.grid(row=row, column=0, columnspan=2, sticky='', padx=5, pady=5)
+    row += 1
 
-    # Labels to display the coordinates
-    hp_coord_label = tk.Label(scrollable_hp_mp_frame, text="HP Bar Coordinates: Not Selected")
-    hp_coord_label.pack(pady=5)
+    set_mp_button = tk.Button(
+        hp_mp_frame,
+        text="Select MP Bar Region",
+        font=("Arial", 10, "bold"),
+        command=lambda: select_region(update_mp_bar_position)
+    )
+    set_mp_button.grid(row=row, column=0, columnspan=2, sticky='', padx=5, pady=5)
+    row += 1
 
-    mp_coord_label = tk.Label(scrollable_hp_mp_frame, text="MP Bar Coordinates: Not Selected")
-    mp_coord_label.pack(pady=5)
+    hp_coord_label = tk.Label(hp_mp_frame, text="HP Bar Coordinates: Not Selected", font=("Arial", 10, "bold"))
+    hp_coord_label.grid(row=row, column=0, columnspan=2, sticky='ew', padx=5, pady=5)
+    row += 1
+
+    mp_coord_label = tk.Label(hp_mp_frame, text="MP Bar Coordinates: Not Selected", font=("Arial", 10, "bold"))
+    mp_coord_label.grid(row=row, column=0, columnspan=2, sticky='ew', padx=5, pady=5)
+    row += 1
 
     if "hp_bar_position" in shared.config:
         hp_coord_label.config(text=f"HP Bar Coordinates: {shared.config['hp_bar_position']}")
@@ -139,58 +172,114 @@ def create_gui() -> None:
         mp_coord_label.config(text=f"MP Bar Coordinates: {region}")
 
     # Settings frame for thresholds and keys
-    settings_frame = tk.Frame(scrollable_hp_mp_frame)
-    settings_frame.pack(pady=10)
+    settings_frame = tk.Frame(hp_mp_frame)
+    settings_frame.grid(row=row, column=0, columnspan=2, sticky='ew', pady=10)
+    row += 1
 
-    tk.Label(settings_frame, text="HP Pot Threshold (%):").grid(row=0, column=0, padx=5, pady=5, sticky=tk.E)
-    hp_percentage_entry = tk.Entry(settings_frame, width=5)
+    # Configure columns in settings_frame
+    settings_frame.columnconfigure(0, weight=1)
+    settings_frame.columnconfigure(1, weight=2)
+    settings_frame.columnconfigure(2, weight=1)
+    settings_frame.columnconfigure(3, weight=2)
+
+    tk.Label(settings_frame, text="HP Pot Threshold (%):", font=("Arial", 10), anchor='e').grid(
+        row=0, column=0, padx=(10, 5), pady=5, sticky='e'
+    )
+    hp_percentage_entry = tk.Entry(settings_frame, width=10)
     hp_percentage_entry.insert(0, str(shared.config.get("hp_threshold", 50)))
-    hp_percentage_entry.grid(row=0, column=1, padx=5, pady=5)
+    hp_percentage_entry.grid(row=0, column=1, padx=5, pady=5, sticky='ew')
 
-    tk.Label(settings_frame, text="HP Pot Key:").grid(row=0, column=2, padx=5, pady=5, sticky=tk.E)
-    hp_pot_key_entry = tk.Entry(settings_frame, width=5)
+    tk.Label(settings_frame, text="HP Pot Key:", font=("Arial", 10), anchor='e').grid(
+        row=0, column=2, padx=(10, 5), pady=5, sticky='e'
+    )
+    hp_pot_key_entry = tk.Entry(settings_frame, width=10)
     hp_pot_key_entry.insert(0, shared.config.get("hp_pot_key", '1'))
-    hp_pot_key_entry.grid(row=0, column=3, padx=5, pady=5)
+    hp_pot_key_entry.grid(row=0, column=3, padx=5, pady=5, sticky='ew')
 
-    tk.Label(settings_frame, text="MP Pot Threshold (%):").grid(row=1, column=0, padx=5, pady=5, sticky=tk.E)
-    mp_percentage_entry = tk.Entry(settings_frame, width=5)
+    # MP Pot Threshold and MP Pot Key row
+    tk.Label(settings_frame, text="MP Pot Threshold (%):", font=("Arial", 10), anchor='e').grid(
+        row=1, column=0, padx=(10, 5), pady=5, sticky='e'
+    )
+    mp_percentage_entry = tk.Entry(settings_frame, width=10)
     mp_percentage_entry.insert(0, str(shared.config.get("mp_threshold", 50)))
-    mp_percentage_entry.grid(row=1, column=1, padx=5, pady=5)
+    mp_percentage_entry.grid(row=1, column=1, padx=5, pady=5, sticky='ew')
 
-    tk.Label(settings_frame, text="MP Pot Key:").grid(row=1, column=2, padx=5, pady=5, sticky=tk.E)
-    mp_pot_key_entry = tk.Entry(settings_frame, width=5)
+    tk.Label(settings_frame, text="MP Pot Key:", font=("Arial", 10), anchor='e').grid(
+        row=1, column=2, padx=(10, 5), pady=5, sticky='e'
+    )
+    mp_pot_key_entry = tk.Entry(settings_frame, width=10)
     mp_pot_key_entry.insert(0, shared.config.get("mp_pot_key", '2'))
-    mp_pot_key_entry.grid(row=1, column=3, padx=5, pady=5)
-    # Attack Settings Tab
-    tk.Label(attack_settings_tab, text="Attack Settings", font=("Arial", 12)).pack(pady=10)
-    scrollable_attack_settings_frame = add_scrollable_frame(attack_settings_tab)
-    # Enable R Attack checkbox
-    enable_basic_attack_var = tk.BooleanVar()
-    enable_basic_attack_checkbox = tk.Checkbutton(scrollable_attack_settings_frame, text="Enable R Attack",
-                                                  variable=enable_basic_attack_var,
-                                                  command=lambda: shared.config["attack_settings"]
-                                                  .__setitem__("enable_basic_attack",
-                                                               enable_basic_attack_var.get()))
-    enable_basic_attack_var.set(shared.config["attack_settings"].get("enable_basic_attack", False))
-    enable_basic_attack_checkbox.pack()
+    mp_pot_key_entry.grid(row=1, column=3, padx=5, pady=5, sticky='ew')
 
-    # Class selection dropdown
-    tk.Label(scrollable_attack_settings_frame, text="Select Class:").pack(pady=4)
+    # Attack Settings Tab
+    tk.Label(attack_settings_tab, text="Attack Settings", font=("Arial", 12, "bold")).pack(pady=10)
+
+    # Top frame for Enable R Attack and Select Class
+    attack_settings_top_frame = tk.Frame(attack_settings_tab)
+    attack_settings_top_frame.pack(fill='x')
+
+    # Configure columns in attack_settings_top_frame
+    attack_settings_top_frame.columnconfigure(0, weight=1)
+    attack_settings_top_frame.columnconfigure(1, weight=1)
+
+    row = 0
+    enable_basic_attack_var = tk.BooleanVar()
+    enable_basic_attack_checkbox = tk.Checkbutton(
+        attack_settings_top_frame,
+        text="Enable Basic Attack",
+        variable=enable_basic_attack_var,
+        command=lambda: shared.config["attack_settings"].__setitem__(
+            "enable_basic_attack",
+            enable_basic_attack_var.get()
+        )
+    )
+    enable_basic_attack_var.set(shared.config["attack_settings"].get("enable_basic_attack", False))
+    enable_basic_attack_checkbox.grid(row=row, column=0, columnspan=2, sticky='nsew', padx=5, pady=5)
+    row += 1
+
+    # Create a frame to hold 'Select Class' label and combobox
+    select_class_frame = tk.Frame(attack_settings_top_frame)
+    select_class_frame.grid(row=row, column=0, columnspan=2, sticky='nsew', padx=5, pady=4)
+
+    # Configure columns in select_class_frame
+    select_class_frame.columnconfigure(0, weight=1)
+    select_class_frame.columnconfigure(1, weight=1)
+
+    tk.Label(select_class_frame, text="Select Class:", font=("Arial", 10, "bold")).grid(
+        row=0, column=0, sticky='e', padx=5, pady=4
+    )
     selected_class = tk.StringVar()
 
-    selected_class.set(shared.config["attack_settings"].get("selected_class",
-                                                            shared.config["class_options"][0]
-                                                            if shared.config["class_options"] else ''))
     shared.config["class_options"] = list(skill_data.keys())
 
-    # Create Combobox
-    class_dropdown = ttk.Combobox(scrollable_attack_settings_frame,
-                                  textvariable=selected_class, values=shared.config["class_options"])
-    class_dropdown.pack()
+    selected_class.set(
+        shared.config["attack_settings"].get(
+            "selected_class",
+            shared.config["class_options"][0] if shared.config["class_options"] else ''
+        )
+    )
 
-    # Skill tree frame with canvas and scrollbar
+    # Create Combobox
+    class_dropdown = ttk.Combobox(
+        select_class_frame,
+        textvariable=selected_class,
+        values=shared.config["class_options"]
+    )
+    class_dropdown.grid(row=0, column=1, sticky='w', padx=5, pady=4)
+    row += 1
+
+    # Scrollable frame for skill tree
+    scrollable_attack_settings_frame = add_scrollable_frame(attack_settings_tab)
+
+    # Configure columns
+    scrollable_attack_settings_frame.columnconfigure(0, weight=1)
+    scrollable_attack_settings_frame.columnconfigure(1, weight=1)
+
+    # Skill tree frame with notebook
     subclass_notebook = ttk.Notebook(scrollable_attack_settings_frame)
-    subclass_notebook.pack(expand=1, fill="both")
+    subclass_notebook.grid(row=0, column=0, columnspan=2, sticky='nsew', padx=5, pady=5)
+    scrollable_attack_settings_frame.rowconfigure(0, weight=1)
+    scrollable_attack_settings_frame.columnconfigure(1, weight=1)
 
     def update_subclasses(*args) -> None:
         # Clean Old Widgets
@@ -218,38 +307,77 @@ def create_gui() -> None:
             skills = skill_data[selected][subclass]
 
             # Skill selection
+            skill_row = 0
+
+            # Add column headers
+            header_frame = tk.Frame(subclass_tab)
+            header_frame.grid(row=skill_row, column=0, sticky='nsew', padx=5, pady=2)
+            skill_row += 1
+
+            # Configure columns with spacers
+            header_frame.columnconfigure(0, weight=0)  # Checkbox
+            header_frame.columnconfigure(1, weight=0)  # Icon
+            header_frame.columnconfigure(2, weight=1)  # Skill Name
+            header_frame.columnconfigure(3, weight=0)  # Spacer
+            header_frame.columnconfigure(4, weight=0)  # Skill Bar
+            header_frame.columnconfigure(5, weight=0)  # Spacer
+            header_frame.columnconfigure(6, weight=0)  # Slot
+
+            # Column headers
+            tk.Label(header_frame, text="", font=("Arial", 10)).grid(row=0, column=0, padx=5)  # For checkbox
+            tk.Label(header_frame, text="", font=("Arial", 10)).grid(row=0, column=1, padx=5)  # For icon
+            tk.Label(header_frame, text="Skill Name", font=("Arial", 10)).grid(row=0, column=2, padx=7)
+            tk.Label(header_frame, text="", font=("Arial", 10)).grid(row=0, column=3, padx=10)  # Spacer
+            tk.Label(header_frame, text="Skill Bar", font=("Arial", 10)).grid(row=0, column=5, padx=5)
+            tk.Label(header_frame, text="", font=("Arial", 10)).grid(row=0, column=5, padx=10)  # Spacer
+            tk.Label(header_frame, text="Skill Slot", font=("Arial", 10)).grid(row=0, column=6, padx=5)
+
             for skill_name in skills:
                 skill_frame = tk.Frame(subclass_tab)
-                skill_frame.pack(fill=tk.X, padx=5, pady=2)
+                skill_frame.grid(row=skill_row, column=0, sticky='nsew', padx=5, pady=2)
+                skill_row += 1
+
+                # Configure columns with spacers
+                skill_frame.columnconfigure(0, weight=0)  # Checkbox
+                skill_frame.columnconfigure(1, weight=0)  # Icon
+                skill_frame.columnconfigure(2, weight=1)  # Skill Name
+                skill_frame.columnconfigure(3, weight=0)  # Spacer
+                skill_frame.columnconfigure(4, weight=0)  # Skill Bar Entry
+                skill_frame.columnconfigure(5, weight=0)  # Spacer
+                skill_frame.columnconfigure(6, weight=0)  # Slot Entry
 
                 skill_var = tk.BooleanVar()
                 skill_checkbox = tk.Checkbutton(skill_frame, variable=skill_var)
-                skill_checkbox.pack(side=tk.LEFT)
+                skill_checkbox.grid(row=0, column=0, sticky='nsew')
 
                 # Skill icon (assuming icons are stored in 'static' folder)
                 skill_icon_path = f"static/{selected.lower()}_{subclass.lower()}_{skill_name.lower()}.png"
                 if os.path.exists(skill_icon_path):
                     skill_image = tk.PhotoImage(file=skill_icon_path)
                     skill_label = tk.Label(skill_frame, image=skill_image)
-                    skill_label.image = skill_image  # type: ignore[attr-defined] # for keeping reference
-                    skill_label.pack(side=tk.LEFT, padx=5)
+                    skill_label.image = skill_image  # Keep a reference
+                    skill_label.grid(row=0, column=1, padx=5)
                 else:
-                    # Resim bulunamadığında placeholder
-                    skill_label = tk.Label(skill_frame, text=skill_name)
-                    skill_label.pack(side=tk.LEFT, padx=5)
+                    # Placeholder if image not found
+                    skill_label = tk.Label(skill_frame, text="", font=("Arial", 10))
+                    skill_label.grid(row=0, column=1, padx=5)
 
                 # Skill name
-                tk.Label(skill_frame, text=skill_name).pack(side=tk.LEFT, padx=5)
+                tk.Label(skill_frame, text=skill_name, font=("Arial", 10)).grid(row=0, column=2, padx=5, sticky='w')
 
-                # Skill bar entry
-                tk.Label(skill_frame, text="Skill Bar:").pack(side=tk.LEFT, padx=5)
-                skill_bar_entry = tk.Entry(skill_frame, width=3)
-                skill_bar_entry.pack(side=tk.LEFT, padx=5)
+                # Spacer between Skill Name and Skill Bar
+                tk.Label(skill_frame, text="", font=("Arial", 10)).grid(row=0, column=3, padx=10)
 
-                # Slot number entry
-                tk.Label(skill_frame, text="Slot:").pack(side=tk.LEFT, padx=5)
-                slot_entry = tk.Entry(skill_frame, width=3)
-                slot_entry.pack(side=tk.LEFT, padx=5)
+                # Skill bar entry (without label)
+                skill_bar_entry = tk.Entry(skill_frame, width=5)
+                skill_bar_entry.grid(row=0, column=4, padx=5)
+
+                # Spacer between Skill Bar and Slot
+                tk.Label(skill_frame, text="", font=("Arial", 10)).grid(row=0, column=5, padx=10)
+
+                # Slot number entry (without label)
+                slot_entry = tk.Entry(skill_frame, width=5)
+                slot_entry.grid(row=0, column=6, padx=5)
 
                 # Load saved skill settings if available
                 saved_skill = next(
@@ -264,7 +392,7 @@ def create_gui() -> None:
 
                 # Save skill settings
                 def save_skill(skill_name=skill_name, subclass=subclass, skill_var=skill_var,
-                               skill_bar_entry=skill_bar_entry, slot_entry=slot_entry) -> None:
+                                skill_bar_entry=skill_bar_entry, slot_entry=slot_entry) -> None:
                     skill_info = {
                         "name": skill_name,
                         "subclass": subclass,
@@ -274,7 +402,7 @@ def create_gui() -> None:
                     }
                     # Remove any existing entry with this skill name
                     shared.config["attack_settings"]["skills"] = [
-                        s for s in shared.config["attack_settings"]["skills"]
+                        s for s in shared.config["attack_settings"].get("skills", [])
                         if s["name"] != skill_name
                     ]
                     # Add the updated skill info
@@ -323,7 +451,6 @@ def create_gui() -> None:
                     enable_basic_attack_var.set(shared.config['attack_settings']['enable_basic_attack'])
                 if 'selected_class' in shared.config['attack_settings']:
                     selected_class_value = shared.config['attack_settings']['selected_class']
-                    # Ensure selected_class_value is not None
                     if selected_class_value is not None:
                         selected_class.set(selected_class_value)
                     else:
@@ -426,18 +553,22 @@ class RegionSelector:
         if self.rect_id:
             self.canvas.delete(self.rect_id)
         if self.start_x is not None and self.start_y is not None:
-            self.rect_id = self.canvas.create_rectangle(self.start_x,
-                                                        self.start_y,
-                                                        cur_x,
-                                                        cur_y,
-                                                        outline='red', width=2)
+            self.rect_id = self.canvas.create_rectangle(
+                self.start_x,
+                self.start_y,
+                cur_x,
+                cur_y,
+                outline='red', width=2
+            )
 
     def on_button_release(self, event: tk.Event) -> None:
         end_x = self.root.winfo_pointerx() - self.root.winfo_rootx()
         end_y = self.root.winfo_pointery() - self.root.winfo_rooty()
         if self.start_x is not None and self.start_y is not None:
-            selected_region = (min(self.start_x, end_x), min(self.start_y, end_y),
-                               max(self.start_x, end_x), max(self.start_y, end_y))
+            selected_region = (
+                min(self.start_x, end_x), min(self.start_y, end_y),
+                max(self.start_x, end_x), max(self.start_y, end_y)
+            )
             logger.info(f"Selected Region: {selected_region}")  # Debugging the selected region
             self.callback(selected_region)
         self.root.destroy()
@@ -467,15 +598,38 @@ def add_scrollable_frame(tab: ttk.Frame) -> ttk.Frame:
 
     # Create a frame inside the canvas to hold the actual content
     scrollable_frame = ttk.Frame(canvas)
-    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    scrollable_frame_id = canvas.create_window((0, 0), window=scrollable_frame, anchor="n")
 
     # Configure the canvas to work with the scrollbar
     canvas.configure(yscrollcommand=scrollbar.set)
 
-    # Update the scrollregion when the frame changes its size
+    # Update the scrollregion and frame width when the frame or canvas size changes
     def on_frame_configure(event: tk.Event) -> None:
         canvas.configure(scrollregion=canvas.bbox("all"))
+        canvas.itemconfig(scrollable_frame_id, width=canvas.winfo_width())
 
     scrollable_frame.bind("<Configure>", on_frame_configure)
+
+    def on_canvas_configure(event: tk.Event) -> None:
+        canvas.itemconfig(scrollable_frame_id, width=event.width)
+
+    canvas.bind("<Configure>", on_canvas_configure)
+
+    # Function to handle mouse wheel scrolling
+    def _on_mousewheel(event):
+        if event.delta:
+            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        elif event.num == 5:
+            canvas.yview_scroll(1, "units")
+        elif event.num == 4:
+            canvas.yview_scroll(-1, "units")
+
+    # Bind mouse wheel events when mouse is over the canvas
+    scrollable_frame.bind("<Enter>", lambda e: canvas.bind_all("<MouseWheel>", _on_mousewheel))
+    scrollable_frame.bind("<Leave>", lambda e: canvas.unbind_all("<MouseWheel>"))
+
+    # For Linux (scroll wheel events)
+    scrollable_frame.bind("<Button-4>", _on_mousewheel)
+    scrollable_frame.bind("<Button-5>", _on_mousewheel)
 
     return scrollable_frame
