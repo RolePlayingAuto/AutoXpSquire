@@ -34,14 +34,15 @@ def create_gui() -> None:
 
     # Control Tab
     tk.Label(control_tab, text="AutoXpSquire Bot Control", font=("Arial", 14)).pack(pady=10)
-    tk.Label(control_tab, text="Game Window Name:").pack()
-    window_name_entry = tk.Entry(control_tab)
+    scrollable_control_frame = add_scrollable_frame(control_tab)
+    tk.Label(scrollable_control_frame, text="Game Window Name:").pack()
+    window_name_entry = tk.Entry(scrollable_control_frame)
     window_name_entry.pack()
     window_name_entry.insert(0, shared.config.get('window_name', ''))
 
     # Auto-attack checkbox
     attack_var = tk.BooleanVar()
-    attack_checkbox = tk.Checkbutton(control_tab, text="Start Auto-Attack", variable=attack_var,
+    attack_checkbox = tk.Checkbutton(scrollable_control_frame, text="Start Auto-Attack", variable=attack_var,
                                      command=lambda: config_variable_setter(shared.config, attack_var.get(),
                                                                             "auto_attack_toggle"))
     attack_var.set(shared.config.get("auto_attack_toggle", False))
@@ -49,7 +50,7 @@ def create_gui() -> None:
 
     # HP and MP check checkbox
     hp_mp_check_var = tk.BooleanVar()
-    hp_mp_checkbox = tk.Checkbutton(control_tab, text="Enable HP/MP Check", variable=hp_mp_check_var,
+    hp_mp_checkbox = tk.Checkbutton(scrollable_control_frame, text="Enable HP/MP Check", variable=hp_mp_check_var,
                                     command=lambda: config_variable_setter(shared.config, hp_mp_check_var.get(),
                                                                            "hp_mp_check"))
     hp_mp_check_var.set(shared.config.get("hp_mp_check", False))
@@ -87,10 +88,10 @@ def create_gui() -> None:
             shared.hp_mp_check_thread = None
         logger.info("Bot stopped")
 
-    start_button = tk.Button(control_tab, text="Start Bot", command=start_bot)
+    start_button = tk.Button(scrollable_control_frame, text="Start Bot", command=start_bot)
     start_button.pack(pady=5)
 
-    stop_button = tk.Button(control_tab, text="Stop Bot", command=stop_bot)
+    stop_button = tk.Button(scrollable_control_frame, text="Stop Bot", command=stop_bot)
     stop_button.pack(pady=5)
 
     # Settings Tab with sub-tabs
@@ -104,21 +105,22 @@ def create_gui() -> None:
 
     # HP/MP Tab content
     tk.Label(hp_mp_tab, text="HP/MP Settings", font=("Arial", 12)).pack(pady=10)
+    scrollable_hp_mp_frame = add_scrollable_frame(hp_mp_tab)
 
     # HP and MP bar selection buttons
-    set_hp_button = tk.Button(hp_mp_tab, text="Select HP Bar Region",
+    set_hp_button = tk.Button(scrollable_hp_mp_frame, text="Select HP Bar Region",
                               command=lambda: select_region(update_hp_bar_position))
     set_hp_button.pack(pady=5)
 
-    set_mp_button = tk.Button(hp_mp_tab, text="Select MP Bar Region",
+    set_mp_button = tk.Button(scrollable_hp_mp_frame, text="Select MP Bar Region",
                               command=lambda: select_region(update_mp_bar_position))
     set_mp_button.pack(pady=5)
 
     # Labels to display the coordinates
-    hp_coord_label = tk.Label(hp_mp_tab, text="HP Bar Coordinates: Not Selected")
+    hp_coord_label = tk.Label(scrollable_hp_mp_frame, text="HP Bar Coordinates: Not Selected")
     hp_coord_label.pack(pady=5)
 
-    mp_coord_label = tk.Label(hp_mp_tab, text="MP Bar Coordinates: Not Selected")
+    mp_coord_label = tk.Label(scrollable_hp_mp_frame, text="MP Bar Coordinates: Not Selected")
     mp_coord_label.pack(pady=5)
 
     if "hp_bar_position" in shared.config:
@@ -137,7 +139,7 @@ def create_gui() -> None:
         mp_coord_label.config(text=f"MP Bar Coordinates: {region}")
 
     # Settings frame for thresholds and keys
-    settings_frame = tk.Frame(hp_mp_tab)
+    settings_frame = tk.Frame(scrollable_hp_mp_frame)
     settings_frame.pack(pady=10)
 
     tk.Label(settings_frame, text="HP Pot Threshold (%):").grid(row=0, column=0, padx=5, pady=5, sticky=tk.E)
@@ -161,16 +163,19 @@ def create_gui() -> None:
     mp_pot_key_entry.grid(row=1, column=3, padx=5, pady=5)
     # Attack Settings Tab
     tk.Label(attack_settings_tab, text="Attack Settings", font=("Arial", 12)).pack(pady=10)
-
+    scrollable_attack_settings_frame = add_scrollable_frame(attack_settings_tab)
     # Enable R Attack checkbox
     enable_basic_attack_var = tk.BooleanVar()
-    enable_basic_attack_checkbox = tk.Checkbutton(attack_settings_tab, text="Enable R Attack",
-                                                  variable=enable_basic_attack_var)
+    enable_basic_attack_checkbox = tk.Checkbutton(scrollable_attack_settings_frame, text="Enable R Attack",
+                                                  variable=enable_basic_attack_var,
+                                                  command=lambda: shared.config["attack_settings"]
+                                                  .__setitem__("enable_basic_attack",
+                                                               enable_basic_attack_var.get()))
     enable_basic_attack_var.set(shared.config["attack_settings"].get("enable_basic_attack", False))
     enable_basic_attack_checkbox.pack()
 
     # Class selection dropdown
-    tk.Label(attack_settings_tab, text="Select Class:").pack(pady=4)
+    tk.Label(scrollable_attack_settings_frame, text="Select Class:").pack(pady=4)
     selected_class = tk.StringVar()
 
     selected_class.set(shared.config["attack_settings"].get("selected_class",
@@ -179,12 +184,12 @@ def create_gui() -> None:
     shared.config["class_options"] = list(skill_data.keys())
 
     # Create Combobox
-    class_dropdown = ttk.Combobox(attack_settings_tab,
+    class_dropdown = ttk.Combobox(scrollable_attack_settings_frame,
                                   textvariable=selected_class, values=shared.config["class_options"])
     class_dropdown.pack()
 
     # Skill tree frame with canvas and scrollbar
-    subclass_notebook = ttk.Notebook(attack_settings_tab)
+    subclass_notebook = ttk.Notebook(scrollable_attack_settings_frame)
     subclass_notebook.pack(expand=1, fill="both")
 
     def update_subclasses(*args) -> None:
@@ -449,3 +454,28 @@ def select_region(callback: Callable[[Tuple[int, int, int, int]], None]) -> None
     region_window.attributes("-topmost", True)
     selector = RegionSelector(region_window, callback)
     selector.get_region()
+
+
+def add_scrollable_frame(tab: ttk.Frame) -> ttk.Frame:
+    # Create a canvas for adding scrollable content
+    canvas = tk.Canvas(tab)
+    canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    # Add a vertical scrollbar linked to the canvas
+    scrollbar = ttk.Scrollbar(tab, orient=tk.VERTICAL, command=canvas.yview)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+    # Create a frame inside the canvas to hold the actual content
+    scrollable_frame = ttk.Frame(canvas)
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+
+    # Configure the canvas to work with the scrollbar
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    # Update the scrollregion when the frame changes its size
+    def on_frame_configure(event: tk.Event) -> None:
+        canvas.configure(scrollregion=canvas.bbox("all"))
+
+    scrollable_frame.bind("<Configure>", on_frame_configure)
+
+    return scrollable_frame

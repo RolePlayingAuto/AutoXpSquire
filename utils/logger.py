@@ -15,7 +15,7 @@ file_handler = TimedRotatingFileHandler(
     backupCount=10,
     encoding="utf-8"
 )
-file_handler.setLevel(logging.DEBUG)
+file_handler.setLevel(logging.WARNING)
 file_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 file_handler.setFormatter(file_format)
 
