@@ -392,7 +392,7 @@ def create_gui() -> None:
 
                 # Save skill settings
                 def save_skill(skill_name=skill_name, subclass=subclass, skill_var=skill_var,
-                                skill_bar_entry=skill_bar_entry, slot_entry=slot_entry) -> None:
+                               skill_bar_entry=skill_bar_entry, slot_entry=slot_entry) -> None:
                     skill_info = {
                         "name": skill_name,
                         "subclass": subclass,
