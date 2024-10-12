@@ -47,7 +47,7 @@ def create_gui() -> None:
         control_frame,
         text="Game Window Name:",
         font=("Arial", 10, "bold")
-        ).grid(row=row, column=0, sticky='e', padx=5, pady=5)
+    ).grid(row=row, column=0, sticky='e', padx=5, pady=(10, 5))
     window_name_entry = tk.Entry(control_frame)
     window_name_entry.grid(row=row, column=1, sticky='w', padx=5, pady=5)
     row += 1
