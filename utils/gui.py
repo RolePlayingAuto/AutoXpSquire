@@ -22,14 +22,14 @@ def create_gui() -> None:
     skill_data = load_skill_data()
     window = tk.Tk()
     window.title("AutoXpSquire")
-    window.geometry("700x800")  # Adjusted for better initial size
+    window.geometry("800x800")  # Adjusted for better initial size
     tab_control = ttk.Notebook(window)
     control_tab = ttk.Frame(tab_control)
     settings_tab = ttk.Frame(tab_control)
     attack_settings_tab = ttk.Frame(tab_control)
     tab_control.add(control_tab, text="Control")
     tab_control.add(settings_tab, text="Settings")
-    tab_control.add(attack_settings_tab, text="Attack Settings")
+    tab_control.add(attack_settings_tab, text="Skill Settings")
     tab_control.pack(expand=1, fill="both")
 
     # Control Tab
@@ -215,10 +215,10 @@ def create_gui() -> None:
     mp_pot_key_entry.insert(0, shared.config.get("mp_pot_key", '2'))
     mp_pot_key_entry.grid(row=1, column=3, padx=5, pady=5, sticky='ew')
 
-    # Attack Settings Tab
-    tk.Label(attack_settings_tab, text="Attack Settings", font=("Arial", 12, "bold")).pack(pady=10)
+    # Skill Settings Tab
+    tk.Label(attack_settings_tab, text="Skill Settings", font=("Arial", 12, "bold")).pack(pady=10)
 
-    # Top frame for Enable R Attack and Select Class
+    # Top frame for Enable Basic Attack and Select Class
     attack_settings_top_frame = tk.Frame(attack_settings_tab)
     attack_settings_top_frame.pack(fill='x')
 
@@ -326,15 +326,18 @@ def create_gui() -> None:
             header_frame.columnconfigure(4, weight=0)  # Skill Bar
             header_frame.columnconfigure(5, weight=0)  # Spacer
             header_frame.columnconfigure(6, weight=0)  # Slot
+            header_frame.columnconfigure(7, weight=0)  # Buff?
+            header_frame.columnconfigure(8, weight=0)  # Heal?
 
             # Column headers
-            tk.Label(header_frame, text="", font=("Arial", 10)).grid(row=0, column=0, padx=5)  # For checkbox
-            tk.Label(header_frame, text="", font=("Arial", 10)).grid(row=0, column=1, padx=5)  # For icon
-            tk.Label(header_frame, text="Skill Name", font=("Arial", 10)).grid(row=0, column=2, padx=7)
-            tk.Label(header_frame, text="", font=("Arial", 10)).grid(row=0, column=3, padx=10)  # Spacer
-            tk.Label(header_frame, text="Skill Bar", font=("Arial", 10)).grid(row=0, column=5, padx=5)
-            tk.Label(header_frame, text="", font=("Arial", 10)).grid(row=0, column=5, padx=10)  # Spacer
-            tk.Label(header_frame, text="Skill Slot", font=("Arial", 10)).grid(row=0, column=6, padx=5)
+            tk.Label(header_frame, text="Actıvate", font=("Arial", 10)).grid(row=0, column=0, padx=1)  # For checkbox
+            tk.Label(header_frame, text="", font=("Arial", 10)).grid(row=0, column=1, padx=1)  # For icon
+            tk.Label(header_frame, text="Skill Name", font=("Arial", 10)).grid(row=0, column=2, padx=10)
+            tk.Label(header_frame, text="", font=("Arial", 10)).grid(row=0, column=3, padx=30)  # Spacer
+            tk.Label(header_frame, text="Skill Bar", font=("Arial", 10)).grid(row=0, column=4, padx=1)
+            tk.Label(header_frame, text="Skill Slot", font=("Arial", 10)).grid(row=0, column=6, padx=1)
+            tk.Label(header_frame, text="Buff?", font=("Arial", 10)).grid(row=0, column=7, padx=1)
+            tk.Label(header_frame, text="Heal?", font=("Arial", 10)).grid(row=0, column=8, padx=1)
 
             for skill_name in skills:
                 skill_frame = tk.Frame(subclass_tab)
@@ -349,6 +352,8 @@ def create_gui() -> None:
                 skill_frame.columnconfigure(4, weight=0)  # Skill Bar Entry
                 skill_frame.columnconfigure(5, weight=0)  # Spacer
                 skill_frame.columnconfigure(6, weight=0)  # Slot Entry
+                skill_frame.columnconfigure(7, weight=0)  # Buff Checkbox
+                skill_frame.columnconfigure(8, weight=0)  # Heal Checkbox
 
                 skill_var = tk.BooleanVar()
                 skill_checkbox = tk.Checkbutton(skill_frame, variable=skill_var)
@@ -367,7 +372,7 @@ def create_gui() -> None:
                     skill_label.grid(row=0, column=1, padx=5, sticky='w')
 
                 # Skill name
-                tk.Label(skill_frame, text=skill_name, font=("Arial", 10)).grid(row=0, column=2, padx=5, sticky='w')
+                tk.Label(skill_frame, text=skill_name, font=("Arial", 10)).grid(row=0, column=2, padx=7, sticky='w')
 
                 # Spacer between Skill Name and Skill Bar
                 tk.Label(skill_frame, text="", font=("Arial", 10)).grid(row=0, column=3, padx=10)
@@ -383,6 +388,16 @@ def create_gui() -> None:
                 slot_entry = tk.Entry(skill_frame, width=5)
                 slot_entry.grid(row=0, column=6, padx=5)
 
+                # Buff? Checkbox
+                buff_var = tk.BooleanVar()
+                buff_checkbox = tk.Checkbutton(skill_frame, variable=buff_var)
+                buff_checkbox.grid(row=0, column=7, padx=5)
+
+                # Heal? Checkbox
+                heal_var = tk.BooleanVar()
+                heal_checkbox = tk.Checkbutton(skill_frame, variable=heal_var)
+                heal_checkbox.grid(row=0, column=8, padx=5)
+
                 # Load saved skill settings if available
                 saved_skill = next(
                     (s for s in shared.config["attack_settings"].get("skills", []) if s["name"] == skill_name),
@@ -393,16 +408,21 @@ def create_gui() -> None:
                     skill_var.set(saved_skill["enabled"])
                     skill_bar_entry.insert(0, saved_skill["skill_bar"])
                     slot_entry.insert(0, saved_skill["slot"])
+                    buff_var.set(saved_skill.get("buff", False))
+                    heal_var.set(saved_skill.get("heal", False))
 
                 # Save skill settings
                 def save_skill(skill_name=skill_name, subclass=subclass, skill_var=skill_var,
-                               skill_bar_entry=skill_bar_entry, slot_entry=slot_entry) -> None:
+                               skill_bar_entry=skill_bar_entry, slot_entry=slot_entry,
+                               buff_var=buff_var, heal_var=heal_var) -> None:
                     skill_info = {
                         "name": skill_name,
                         "subclass": subclass,
                         "enabled": skill_var.get(),
                         "skill_bar": skill_bar_entry.get(),
-                        "slot": slot_entry.get()
+                        "slot": slot_entry.get(),
+                        "buff": buff_var.get(),
+                        "heal": heal_var.get()
                     }
                     # Remove any existing entry with this skill name
                     shared.config["attack_settings"]["skills"] = [
@@ -414,6 +434,8 @@ def create_gui() -> None:
 
                 # Bind save on change
                 skill_var.trace_add("write", lambda *args, save_skill=save_skill: save_skill())  # type: ignore[misc]
+                buff_var.trace_add("write", lambda *args, save_skill=save_skill: save_skill())  # type: ignore[misc]
+                heal_var.trace_add("write", lambda *args, save_skill=save_skill: save_skill())  # type: ignore[misc]
                 skill_bar_entry.bind("<FocusOut>", lambda e, save_skill=save_skill: save_skill())  # type: ignore[misc]
                 slot_entry.bind("<FocusOut>", lambda e, save_skill=save_skill: save_skill())  # type: ignore[misc]
 
