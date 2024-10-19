@@ -6,4 +6,6 @@ from utils.loader import load_config
 
 auto_attack_thread: Optional[Thread] = None
 hp_mp_check_thread: Optional[Thread] = None
+buff_thread: Optional[Thread] = None
+#heal_thread: Optional[Thread] = None
 config = load_config()

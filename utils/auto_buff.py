@@ -1,0 +1,77 @@
+import os
+import threading
+import time
+import cv2
+import numpy as np
+from PIL import ImageGrab
+
+import utils.shared as shared
+from utils.logger import get_logger
+
+logger = get_logger(__name__)
+
+def start_buff_thread(config: dict) -> threading.Thread:
+    buff_thread = threading.Thread(target=buff_loop, args=(config,), daemon=True)
+    buff_thread.start()
+    return buff_thread
+
+def stop_buff_thread(buff_thread: threading.Thread) -> None:
+    shared.stop_buff = True
+    buff_thread.join()
+
+def buff_loop(config) -> None:
+    shared.stop_buff = False
+    buff_skills = [skill for skill in config["attack_settings"]["skills"] if skill.get("buff")]
+
+    if not buff_skills:
+        logger.info("No buff skills configured.")
+        return
+
+    buff_coordinates = config.get("buff_coordinates")
+    if not buff_coordinates:
+        logger.error("Buff coordinates not set.")
+        return
+
+    while not shared.stop_buff:
+        for skill in buff_skills:
+            # Construct the icon path
+            icon_path = f"static/{config['attack_settings']['selected_class'].lower()}_{skill['subclass'].lower()}_{skill['name'].lower()}.png"
+            if not os.path.exists(icon_path):
+                logger.error(f"Icon not found for skill {skill['name']} at {icon_path}")
+                continue
+
+            # Capture screenshot of the buff area
+            x1, y1, x2, y2 = buff_coordinates
+            screenshot = ImageGrab.grab(bbox=(x1, y1, x2, y2))
+            screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2GRAY)
+
+            # Load the buff icon
+            template = cv2.imread(icon_path, cv2.IMREAD_GRAYSCALE)
+            if template is None:
+                logger.error(f"Failed to load template image for {skill['name']}")
+                continue
+
+            # Perform template matching
+            res = cv2.matchTemplate(screenshot, template, cv2.TM_CCOEFF_NORMED)
+            threshold = 0.8
+            loc = np.where(res >= threshold)
+
+            if len(loc[0]) == 0:
+                # Icon not found, cast buff
+                logger.info(f"Casting buff {skill['name']}")
+                # Bring game window to front
+                target_window = shared.target_window
+                if target_window:
+                    target_window.activate()
+                    time.sleep(0.1)
+                    # Send key press
+                    import pydirectinput
+                    slot = skill.get("slot", "1")
+                    pydirectinput.press(slot)
+                    time.sleep(0.1)
+                else:
+                    logger.error("Game window not found.")
+            else:
+                logger.debug(f"Buff {skill['name']} is active.")
+
+        time.sleep(5)  # Wait before next check
