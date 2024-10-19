@@ -556,7 +556,8 @@ def create_gui() -> None:
                     ]
                     # Add the updated skill info
                     shared.config["attack_settings"]["skills"].append(skill_info)
-
+                    update_buff_settings()
+                    update_heal_settings()
                 # Bind save on change and update settings
                 def on_skill_var_change(*args) -> None:
                     save_skill()
