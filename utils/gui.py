@@ -265,7 +265,7 @@ def create_gui() -> None:
             if os.path.exists(skill_icon_path):
                 skill_image = tk.PhotoImage(file=skill_icon_path)
                 skill_label = tk.Label(buff_frame, image=skill_image)
-                skill_label.image = skill_image  # Keep a reference
+                skill_label.image = skill_image   # type: ignore[attr-defined] # Keep a reference
                 skill_label.pack(side='left', padx=5)
             else:
                 # Placeholder if image not found
