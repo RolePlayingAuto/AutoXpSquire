@@ -120,8 +120,12 @@ def create_gui() -> None:
     settings_notebook.pack(expand=1, fill="both")
 
     hp_mp_tab = ttk.Frame(settings_notebook)
+    buff_settings_tab = ttk.Frame(settings_notebook)
+    heal_settings_tab = ttk.Frame(settings_notebook)
     other_settings_tab = ttk.Frame(settings_notebook)
     settings_notebook.add(hp_mp_tab, text="HP/MP")
+    settings_notebook.add(buff_settings_tab, text="Buff Settings")
+    settings_notebook.add(heal_settings_tab, text="Heal Settings")
     settings_notebook.add(other_settings_tab, text="Other Settings")
 
     # HP/MP Tab content
@@ -215,6 +219,120 @@ def create_gui() -> None:
     mp_pot_key_entry.insert(0, shared.config.get("mp_pot_key", '2'))
     mp_pot_key_entry.grid(row=1, column=3, padx=5, pady=5, sticky='ew')
 
+    # Buff Settings and Heal Settings functions
+    def update_buff_settings() -> None:
+        # Clear the current contents of buff_settings_tab
+        for widget in buff_settings_tab.winfo_children():
+            widget.destroy()
+
+        # Get the list of buffs
+        buffs = [skill for skill in shared.config["attack_settings"].get("skills", []) if skill.get("buff")]
+
+        if not buffs:
+            # Display message
+            tk.Label(buff_settings_tab, text="Please select skills under Skill Settings", font=("Arial", 12)).pack(pady=10)
+            return
+
+        # Add coordinate selector at the top
+        coord_frame = tk.Frame(buff_settings_tab)
+        coord_frame.pack(fill='x', padx=5, pady=5)
+
+        coord_label = tk.Label(coord_frame, text="Coordinates: Not Selected", font=("Arial", 10))
+        coord_label.pack(side='left', padx=5)
+
+        def update_buff_coord(region: Tuple[int,int, int, int]) -> None:
+            # Save the coordinate to shared.config
+            shared.config["buff_coordinates"] = region
+            coord_label.config(text=f"Coordinates: {region}")
+
+        select_coord_button = tk.Button(coord_frame, text="Select Coordinates", command=lambda: select_region(update_buff_coord))
+        select_coord_button.pack(side='left', padx=5)
+
+        # If coordinates are already saved, display them
+        if shared.config.get('buff_coordinates'):
+            coord_label.config(text=f"Coordinates: {shared.config['buff_coordinates']}")
+
+        # For each buff, display the icon, name, and "Party?" checkbox
+        for buff in buffs:
+            buff_frame = tk.Frame(buff_settings_tab)
+            buff_frame.pack(fill='x', padx=5, pady=5)
+
+            # Icon
+            skill_icon_path = f"static/{shared.config['attack_settings']['selected_class'].lower()}_{buff['subclass'].lower()}_{buff['name'].lower()}.png"
+            if os.path.exists(skill_icon_path):
+                skill_image = tk.PhotoImage(file=skill_icon_path)
+                skill_label = tk.Label(buff_frame, image=skill_image)
+                skill_label.image = skill_image  # Keep a reference
+                skill_label.pack(side='left', padx=5)
+            else:
+                # Placeholder if image not found
+                skill_label = tk.Label(buff_frame, text=buff['name'], font=("Arial", 10))
+                skill_label.pack(side='left', padx=5)
+
+            # Name
+            tk.Label(buff_frame, text=buff['name'], font=("Arial", 10)).pack(side='left', padx=5)
+
+            # "Party?" checkbox
+            party_var = tk.BooleanVar(value=buff.get('party', False))
+            party_checkbox = tk.Checkbutton(buff_frame, text='Party?', variable=party_var)
+
+            def save_party_var(skill_name=buff['name'], party_var=party_var):
+                # Update the skill in shared.config
+                for skill in shared.config["attack_settings"].get("skills", []):
+                    if skill['name'] == skill_name:
+                        skill['party'] = party_var.get()
+                        break
+
+            party_var.trace_add("write", lambda *args, skill_name=buff['name'], party_var=party_var: save_party_var(skill_name, party_var))
+            party_checkbox.pack(side='left', padx=5)
+
+    def update_heal_settings() -> None:
+        # Clear the current contents of heal_settings_tab
+        for widget in heal_settings_tab.winfo_children():
+            widget.destroy()
+
+        # Get the list of heals
+        heals = [skill for skill in shared.config["attack_settings"].get("skills", []) if skill.get("heal")]
+
+        if not heals:
+            # Display message
+            tk.Label(heal_settings_tab, text="Please select skills under Skill Settings", font=("Arial", 12)).pack(pady=10)
+            return
+
+        # For each heal, display the icon, name, "Party?" checkbox
+        for heal in heals:
+            heal_frame = tk.Frame(heal_settings_tab)
+            heal_frame.pack(fill='x', padx=5, pady=5)
+
+            # Icon
+            skill_icon_path = f"static/{shared.config['attack_settings']['selected_class'].lower()}_{heal['subclass'].lower()}_{heal['name'].lower()}.png"
+            if os.path.exists(skill_icon_path):
+                skill_image = tk.PhotoImage(file=skill_icon_path)
+                skill_label = tk.Label(heal_frame, image=skill_image)
+                skill_label.image = skill_image  # Keep a reference
+                skill_label.pack(side='left', padx=5)
+            else:
+                # Placeholder if image not found
+                skill_label = tk.Label(heal_frame, text=heal['name'], font=("Arial", 10))
+                skill_label.pack(side='left', padx=5)
+
+            # Name
+            tk.Label(heal_frame, text=heal['name'], font=("Arial", 10)).pack(side='left', padx=5)
+
+            # "Party?" checkbox
+            party_var = tk.BooleanVar(value=heal.get('party', False))
+            party_checkbox = tk.Checkbutton(heal_frame, text='Party?', variable=party_var)
+
+            def save_party_var(skill_name=heal['name'], party_var=party_var):
+                # Update the skill in shared.config
+                for skill in shared.config["attack_settings"].get("skills", []):
+                    if skill['name'] == skill_name:
+                        skill['party'] = party_var.get()
+                        break
+
+            party_var.trace_add("write", lambda *args, skill_name=heal['name'], party_var=party_var: save_party_var(skill_name, party_var))
+            party_checkbox.pack(side='left', padx=5)
+
     # Skill Settings Tab
     tk.Label(attack_settings_tab, text="Skill Settings", font=("Arial", 12, "bold")).pack(pady=10)
 
@@ -287,8 +405,8 @@ def create_gui() -> None:
 
     def update_subclasses(*args) -> None:
         # Clean Old Widgets
-        for tab in subclass_notebook.tabs():
-            subclass_notebook.forget(tab)
+        for tab_id in subclass_notebook.tabs():
+            subclass_notebook.forget(tab_id)
 
         selected = selected_class.get()
         logger.debug(f"Selected class: {selected}")
@@ -330,7 +448,7 @@ def create_gui() -> None:
             header_frame.columnconfigure(8, weight=0)  # Heal?
 
             # Column headers
-            tk.Label(header_frame, text="Actıvate", font=("Arial", 10)).grid(row=0, column=0, padx=1)  # For checkbox
+            tk.Label(header_frame, text="Activate", font=("Arial", 10)).grid(row=0, column=0, padx=1)  # For checkbox
             tk.Label(header_frame, text="", font=("Arial", 10)).grid(row=0, column=1, padx=1)  # For icon
             tk.Label(header_frame, text="Skill Name", font=("Arial", 10)).grid(row=0, column=2, padx=10)
             tk.Label(header_frame, text="", font=("Arial", 10)).grid(row=0, column=3, padx=30)  # Spacer
@@ -432,12 +550,20 @@ def create_gui() -> None:
                     # Add the updated skill info
                     shared.config["attack_settings"]["skills"].append(skill_info)
 
-                # Bind save on change
-                skill_var.trace_add("write", lambda *args, save_skill=save_skill: save_skill())  # type: ignore[misc]
-                buff_var.trace_add("write", lambda *args, save_skill=save_skill: save_skill())  # type: ignore[misc]
-                heal_var.trace_add("write", lambda *args, save_skill=save_skill: save_skill())  # type: ignore[misc]
-                skill_bar_entry.bind("<FocusOut>", lambda e, save_skill=save_skill: save_skill())  # type: ignore[misc]
-                slot_entry.bind("<FocusOut>", lambda e, save_skill=save_skill: save_skill())  # type: ignore[misc]
+                # Bind save on change and update settings
+                def on_skill_var_change(*args):
+                    save_skill()
+                    update_buff_settings()
+                    update_heal_settings()
+
+                skill_var.trace_add("write", on_skill_var_change)
+                buff_var.trace_add("write", on_skill_var_change)
+                heal_var.trace_add("write", on_skill_var_change)
+                skill_bar_entry.bind("<FocusOut>", lambda e: save_skill())
+                slot_entry.bind("<FocusOut>", lambda e: save_skill())
+
+        update_buff_settings()
+        update_heal_settings()
 
     selected_class.trace_add("write", update_subclasses)
     update_subclasses()
@@ -490,6 +616,10 @@ def create_gui() -> None:
                 # If 'attack_settings' is not in config, reset relevant GUI elements
                 enable_basic_attack_var.set(False)
                 selected_class.set('')
+
+            # Load Buff coordinates
+            if shared.config.get('buff_coordinates'):
+                update_buff_settings()
 
             tk.messagebox.showinfo("Settings", "Configuration loaded successfully.")
         else:
