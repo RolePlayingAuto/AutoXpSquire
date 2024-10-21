@@ -583,10 +583,6 @@ def create_gui() -> None:
                     update_buff_settings()
                     update_heal_settings()
                 # Bind save on change and update settings
-                def on_skill_var_change(*args) -> None:
-                    save_skill()
-                    update_buff_settings()
-                    update_heal_settings()
 
                 skill_var.trace_add("write", lambda *args, save_skill=save_skill: save_skill())  # type: ignore[misc]
                 heal_var.trace_add("write", lambda *args, save_skill=save_skill: save_skill())  # type: ignore[misc]
