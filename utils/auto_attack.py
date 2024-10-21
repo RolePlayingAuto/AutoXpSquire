@@ -13,6 +13,7 @@ def auto_attack_function(config: dict) -> None:
     attack_settings = config["attack_settings"]
     enabled_skills = [skill for skill in attack_settings.get("skills", [])
                       if skill["enabled"] and not skill["buff"] and not skill["heal"]]
+    shared.resume_attack_event.set()
     while config['auto_attack_toggle'] and not shared.stop_auto_attack_event.is_set():
         # Continuously press 'Z' to target
         pydirectinput.press('z')
@@ -20,6 +21,9 @@ def auto_attack_function(config: dict) -> None:
 
         # Execute selected skills
         for skill in enabled_skills:
+            if not shared.resume_attack_event.is_set():
+                time.sleep(0.1)
+                continue
             logger.info(f"Attempting skill: {skill['name']}")
             pydirectinput.press(skill["skill_bar"])
             pydirectinput.press(skill["slot"])
@@ -29,8 +33,6 @@ def auto_attack_function(config: dict) -> None:
             pydirectinput.press('z')
             # Increase delay between skill activations
             time.sleep(0.15)
-            if shared.stop_auto_attack_event.is_set():
-                break
 
 
 def start_auto_attack(config: dict) -> threading.Thread | None:

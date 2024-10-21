@@ -69,13 +69,13 @@ def buff_loop(config: dict) -> None:
 
             if max_val < threshold:
                 logger.debug(f"Max match value: {max_val} for {skill['name']}")
-                shared.stop_auto_attack_event.set()
+                shared.resume_attack_event.clear()
                 # Icon not found, cast buff
                 logger.info(f"Casting buff {skill['name']}")
                 pydirectinput.press(skill["skill_bar"])
                 pydirectinput.press(skill["slot"])
-                time.sleep(4)
-                shared.stop_auto_attack_event.clear()
+                time.sleep(3)
+                shared.resume_attack_event.set()
             else:
                 logger.debug(f"Buff {skill['name']} is active.")
     time.sleep(1)

@@ -13,5 +13,6 @@ buff_thread: Optional[Thread] = None
 stop_auto_attack_event = Event()
 stop_hp_mp_event = Event()
 stop_auto_buff_event = Event()
+resume_attack_event = Event()
 
 config = load_config()
