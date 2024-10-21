@@ -11,14 +11,18 @@ from utils.logger import get_logger
 logger = get_logger(__name__)
 
 
-def start_buff_thread(config: dict) -> threading.Thread:
-    shared.stop_auto_buff_event.clear()
-    buff_thread = threading.Thread(target=buff_loop, args=(config,), daemon=True)
-    buff_thread.start()
-    return buff_thread
+def start_auto_buff(config: dict) -> threading.Thread:
+    if config['auto_buff']:
+        shared.stop_auto_buff_event.clear()
+        buff_thread = threading.Thread(target=buff_loop, args=(config,), daemon=True)
+        buff_thread.start()
+        logger.info("Auto-buff started.")
+        return buff_thread
+    else:
+        return None
 
 
-def stop_buff_thread(buff_thread: threading.Thread) -> None:
+def stop_auto_buff(buff_thread: threading.Thread) -> None:
     shared.stop_auto_buff_event.set()
     buff_thread.join()
     logger.info("Auto-buff stopped.")
@@ -66,18 +70,11 @@ def buff_loop(config: dict) -> None:
             if len(loc[0]) == 0:
                 # Icon not found, cast buff
                 logger.info(f"Casting buff {skill['name']}")
-                # Bring game window to front
-                target_window = shared.target_window
-                if target_window:
-                    target_window.activate()
-                    time.sleep(0.1)
-                    # Send key press
-                    import pydirectinput
-                    slot = skill.get("slot", "1")
-                    pydirectinput.press(slot)
-                    time.sleep(0.1)
-                else:
-                    logger.error("Game window not found.")
+                time.sleep(0.1)
+                import pydirectinput
+                pydirectinput.press(skill["skill_bar"])
+                pydirectinput.press(skill["slot"])
+                time.sleep(0.1)
             else:
                 logger.debug(f"Buff {skill['name']} is active.")
 

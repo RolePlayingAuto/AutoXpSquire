@@ -9,6 +9,7 @@ import pygetwindow as gw
 import utils.shared as shared
 from utils.auto_attack import start_auto_attack, stop_auto_attack
 from utils.hp_mp import start_hp_mp_check, stop_hp_mp_check
+from utils.auto_buff import start_auto_buff, stop_auto_buff
 from utils.loader import load_skill_data, write_config_to_file
 from utils.logger import get_logger
 
@@ -82,9 +83,9 @@ def create_gui() -> None:
         control_frame,
         text="Enable Auto Buff",
         variable=auto_buff_var,
-        command=lambda: config_variable_setter(shared.config, auto_buff_var.get(), "enable_auto_buff")
+        command=lambda: config_variable_setter(shared.config, auto_buff_var.get(), "auto_buff")
     )
-    auto_buff_var.set(shared.config.get("enable_auto_buff", False))
+    auto_buff_var.set(shared.config.get("auto_buff", False))
     auto_buff_checkbox.grid(row=row, column=0, columnspan=2, sticky='', padx=5, pady=5)
     row += 1
 
@@ -114,11 +115,13 @@ def create_gui() -> None:
 
         # Bring the game window to the front
         target_window.activate()
-        time.sleep(0.5)
+        time.sleep(0.3)
         if attack_var.get():
             shared.auto_attack_thread = start_auto_attack(shared.config)
         if hp_mp_check_var.get():
             shared.hp_mp_check_thread = start_hp_mp_check(shared.config)
+        if auto_buff_var.get():
+            shared.buff_thread = start_auto_buff(shared.config)
         logger.info("Bot started.")
 
     def stop_bot() -> None:
@@ -130,6 +133,10 @@ def create_gui() -> None:
             logger.info("hp_mp_check thread found, stopping hp_mp_check")
             stop_hp_mp_check(shared.hp_mp_check_thread)
             shared.hp_mp_check_thread = None
+        if shared.auto_buff_thread:
+            logger.info("auto_buff thread found, stopping auto_buff")
+            stop_auto_buff(shared.buff_thread)
+            shared.auto_buff_thread = None
         logger.info("Bot stopped")
 
     # Start and Stop buttons

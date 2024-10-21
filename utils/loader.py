@@ -24,6 +24,7 @@ def load_config(config_file: str = "config/config.yml") -> dict:
         mp_pot_key = config.get("mp_pot_key", '2')
         hp_mp_check = config.get("hp_mp_check", False)
         auto_attack_toggle = config.get("auto_attack_toggle", False)
+        auto_buff = config.get("auto_buff", False)
 
         hp_bar_position = config.get("hp_bar_position", None)
         mp_bar_position = config.get("mp_bar_position", None)
@@ -43,6 +44,7 @@ def load_config(config_file: str = "config/config.yml") -> dict:
             "hp_pot_key": hp_pot_key,
             "mp_pot_key": mp_pot_key,
             "hp_mp_check": hp_mp_check,
+            "auto_buff": auto_buff,
             "auto_attack_toggle": auto_attack_toggle,
             "hp_bar_position": hp_bar_position,
             "mp_bar_position": mp_bar_position,

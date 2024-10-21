@@ -29,14 +29,15 @@ def auto_attack_function(config: dict) -> None:
             pydirectinput.press('z')
             # Increase delay between skill activations
             time.sleep(0.15)
-            shared.stop_auto_attack_event.wait()
+            if shared.stop_auto_attack_event.is_set():
+                break
 
 
 def start_auto_attack(config: dict) -> threading.Thread | None:
     try:
         if config['auto_attack_toggle']:
             shared.stop_auto_attack_event.clear()
-            attack_thread = threading.Thread(target=auto_attack_function, args=(config,))
+            attack_thread = threading.Thread(target=auto_attack_function, args=(config,), daemon=True)
             attack_thread.start()
             logger.info("Auto-attack started.")
             return attack_thread
