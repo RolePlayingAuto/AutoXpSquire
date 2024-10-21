@@ -11,7 +11,8 @@ logger = get_logger(__name__)
 
 def auto_attack_function(config: dict) -> None:
     attack_settings = config["attack_settings"]
-    enabled_skills = [skill for skill in attack_settings.get("skills", []) if skill["enabled"]]
+    enabled_skills = [skill for skill in attack_settings.get("skills", [])
+                      if skill["enabled"] and not skill["buff"] and not skill["heal"]]
     while config['auto_attack_toggle'] and not shared.stop_auto_attack_event.is_set():
         # Continuously press 'Z' to target
         pydirectinput.press('z')
