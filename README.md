@@ -22,12 +22,12 @@ Helper for your RPG fantasies to become the best Knight via Python
 - Select the HP and MP bar regions.
 - Enter auto pot thresholds and pot keys.
 
-#### Attack Settings
+### Attack Settings
 - Enable R auto attack if you want it in.
 - Classes and skills will be loaded from the `config/skill_data.yml` file. Enter any type of class skills and skills types in the file following example format to show your classes and skills here. Skill images can optionally be stored in `static/` folder to see them in GUI. Image names should follow `{class_name}_{skill_type}_{skill_name}` format.
 - Tick the skills you want to be used, enter their skill bar shortcuts and skill slot shortcuts. Example Skill bar `F4` Slot `5`.
 
-#### Buff Settings
+### Buff Settings
 - For any buff skill to be recognized and cast, their template image needs to be in `static/` with correct naming.
 - From the `Skill Settings` Tab tick the `buff` for any skill that you want registered as a buff. This will add the skill to `Buff Settings` Tab under `Settings` Tab.
 - Tick the `Activate` for the buff that you want it to be checked for and cast.
