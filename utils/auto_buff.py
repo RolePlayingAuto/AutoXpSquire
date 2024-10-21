@@ -65,10 +65,10 @@ def buff_loop(config: dict) -> None:
             # Perform template matching
             res = cv2.matchTemplate(screenshot, template, cv2.TM_CCOEFF_NORMED)
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-            threshold = 0.45
+            threshold = 0.75
 
             if max_val < threshold:
-                logger.info(f"Max match value: {max_val} for {skill['name']}")
+                logger.debug(f"Max match value: {max_val} for {skill['name']}")
                 shared.stop_auto_attack_event.set()
                 # Icon not found, cast buff
                 logger.info(f"Casting buff {skill['name']}")
