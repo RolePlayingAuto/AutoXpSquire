@@ -7,10 +7,10 @@ import numpy as np
 import pydirectinput
 from PIL import ImageGrab
 
+import utils.shared as shared
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
-stop_hp_mp_event = threading.Event()
 
 
 def calculate_bar_percentage(region: Tuple[int, int, int, int],
@@ -69,7 +69,7 @@ def check_hp_mp(hp_threshold: int, mp_threshold: int,
                 hp_bar_position: Tuple[int, int, int, int],
                 mp_bar_position: Tuple[int, int, int, int],
                 hp_pot_key: int, mp_pot_key: int) -> None:
-    while not stop_hp_mp_event.is_set():
+    while not shared.stop_hp_mp_event.is_set():
         hp_percentage, mp_percentage = read_hp_mp(hp_bar_position, mp_bar_position)
 
         if hp_percentage is not None and mp_percentage is not None:
@@ -87,7 +87,7 @@ def check_hp_mp(hp_threshold: int, mp_threshold: int,
 def start_hp_mp_check(config: dict) -> threading.Thread | None:
     try:
         if config['hp_mp_check']:
-            stop_hp_mp_event.clear()
+            shared.stop_hp_mp_event.clear()
             hp_mp_thread = threading.Thread(
                 target=check_hp_mp,
                 args=(config["hp_threshold"], config["mp_threshold"], config["hp_bar_position"],
@@ -105,7 +105,7 @@ def start_hp_mp_check(config: dict) -> threading.Thread | None:
 
 # Stop HP/MP check
 def stop_hp_mp_check(hp_mp_thread: threading.Thread) -> None:
-    stop_hp_mp_event.set()
+    shared.stop_hp_mp_event.set()
     hp_mp_thread.join()
     logger.info("HP/MP check stopped.")
     return None

@@ -24,9 +24,11 @@ def load_config(config_file: str = "config/config.yml") -> dict:
         mp_pot_key = config.get("mp_pot_key", '2')
         hp_mp_check = config.get("hp_mp_check", False)
         auto_attack_toggle = config.get("auto_attack_toggle", False)
+        auto_buff = config.get("auto_buff", False)
 
         hp_bar_position = config.get("hp_bar_position", None)
         mp_bar_position = config.get("mp_bar_position", None)
+        buff_coordinates = config.get("buff_coordinates", None)
 
         attack_settings = config.get("attack_settings", {})
         enable_basic_attack = attack_settings.get("enable_basic_attack", False)
@@ -43,9 +45,11 @@ def load_config(config_file: str = "config/config.yml") -> dict:
             "hp_pot_key": hp_pot_key,
             "mp_pot_key": mp_pot_key,
             "hp_mp_check": hp_mp_check,
+            "auto_buff": auto_buff,
             "auto_attack_toggle": auto_attack_toggle,
             "hp_bar_position": hp_bar_position,
             "mp_bar_position": mp_bar_position,
+            "buff_coordinates": buff_coordinates,
             "attack_settings": {
                 "enable_basic_attack": enable_basic_attack,
                 "selected_class": selected_class,
