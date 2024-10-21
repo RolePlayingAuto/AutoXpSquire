@@ -28,6 +28,7 @@ def load_config(config_file: str = "config/config.yml") -> dict:
 
         hp_bar_position = config.get("hp_bar_position", None)
         mp_bar_position = config.get("mp_bar_position", None)
+        buff_coordinates = config.get("buff_coordinates", None)
 
         attack_settings = config.get("attack_settings", {})
         enable_basic_attack = attack_settings.get("enable_basic_attack", False)
@@ -48,6 +49,7 @@ def load_config(config_file: str = "config/config.yml") -> dict:
             "auto_attack_toggle": auto_attack_toggle,
             "hp_bar_position": hp_bar_position,
             "mp_bar_position": mp_bar_position,
+            "buff_coordinates": buff_coordinates,
             "attack_settings": {
                 "enable_basic_attack": enable_basic_attack,
                 "selected_class": selected_class,
