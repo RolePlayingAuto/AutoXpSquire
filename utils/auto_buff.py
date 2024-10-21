@@ -4,6 +4,7 @@ import time
 
 import cv2
 import numpy as np
+import pydirectinput
 from PIL import ImageGrab
 
 import utils.shared as shared
@@ -72,7 +73,6 @@ def buff_loop(config: dict) -> None:
                 # Icon not found, cast buff
                 logger.info(f"Casting buff {skill['name']}")
                 time.sleep(0.1)
-                import pydirectinput
                 pydirectinput.press(skill["skill_bar"])
                 pydirectinput.press(skill["slot"])
                 time.sleep(0.1)
