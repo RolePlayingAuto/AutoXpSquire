@@ -43,15 +43,13 @@ def stop_threads() -> None:
     if shared.buff_thread:
         stop_buff_thread(shared.buff_thread)
         shared.buff_thread = None
-    # if shared.heal_thread:
-    #     stop_heal_thread(shared.heal_thread)
-    #     shared.heal_thread = None
+
 
 def start_threads() -> None:
     shared.auto_attack_thread = start_auto_attack(shared.config)
     shared.hp_mp_check_thread = start_hp_mp_check(shared.config)
     shared.buff_thread = start_buff_thread(shared.config)
-    #shared.heal_thread = start_heal_thread(shared.config)
+
 
 if __name__ == "__main__":
     start_global_key_listener()

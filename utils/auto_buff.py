@@ -10,17 +10,22 @@ from utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+
 def start_buff_thread(config: dict) -> threading.Thread:
+    shared.stop_auto_buff_event.clear()
     buff_thread = threading.Thread(target=buff_loop, args=(config,), daemon=True)
     buff_thread.start()
     return buff_thread
 
-def stop_buff_thread(buff_thread: threading.Thread) -> None:
-    shared.stop_buff = True
-    buff_thread.join()
 
-def buff_loop(config) -> None:
-    shared.stop_buff = False
+def stop_buff_thread(buff_thread: threading.Thread) -> None:
+    shared.stop_auto_buff_event.set()
+    buff_thread.join()
+    logger.info("Auto-buff stopped.")
+    return None
+
+
+def buff_loop(config: dict) -> None:
     buff_skills = [skill for skill in config["attack_settings"]["skills"] if skill.get("buff")]
 
     if not buff_skills:
@@ -32,10 +37,12 @@ def buff_loop(config) -> None:
         logger.error("Buff coordinates not set.")
         return
 
-    while not shared.stop_buff:
+    while not shared.stop_auto_buff_event.is_set():
+        shared.stop_auto_attack_event.set()
         for skill in buff_skills:
             # Construct the icon path
-            icon_path = f"static/{config['attack_settings']['selected_class'].lower()}_{skill['subclass'].lower()}_{skill['name'].lower()}.png"
+            icon_path = f"static/{config['attack_settings']['selected_class'].
+                                  lower()}_{skill['subclass'].lower()}_{skill['name'].lower()}.png"
             if not os.path.exists(icon_path):
                 logger.error(f"Icon not found for skill {skill['name']} at {icon_path}")
                 continue
@@ -74,4 +81,5 @@ def buff_loop(config) -> None:
             else:
                 logger.debug(f"Buff {skill['name']} is active.")
 
-        time.sleep(5)  # Wait before next check
+        time.sleep(4)  # Wait before next check
+    shared.stop_auto_attack_event.clear()
