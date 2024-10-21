@@ -89,18 +89,6 @@ def create_gui() -> None:
     auto_buff_checkbox.grid(row=row, column=0, columnspan=2, sticky='', padx=5, pady=5)
     row += 1
 
-    # Placeholder for Auto Heal checkbox (if needed in the future)
-    # auto_heal_var = tk.BooleanVar()
-    # auto_heal_checkbox = tk.Checkbutton(
-    #     control_frame,
-    #     text="Enable Auto Heal",
-    #     variable=auto_heal_var,
-    #     command=lambda: config_variable_setter(shared.config, auto_heal_var.get(), "enable_auto_heal")
-    # )
-    # auto_heal_var.set(shared.config.get("enable_auto_heal", False))
-    # auto_heal_checkbox.grid(row=row, column=0, columnspan=2, sticky='', padx=5, pady=5)
-    # row += 1
-
     def config_variable_setter(config: dict, variable: Any, variable_name: str) -> None:
         config[variable_name] = variable
         logger.info(f"Config value {variable_name} has been set to: {variable}")
