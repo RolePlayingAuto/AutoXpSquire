@@ -1,6 +1,7 @@
 import os
 import threading
 import time
+
 import cv2
 import numpy as np
 from PIL import ImageGrab
@@ -11,7 +12,7 @@ from utils.logger import get_logger
 logger = get_logger(__name__)
 
 
-def start_auto_buff(config: dict) -> threading.Thread:
+def start_auto_buff(config: dict) -> threading.Thread | None:
     if config['auto_buff']:
         shared.stop_auto_buff_event.clear()
         buff_thread = threading.Thread(target=buff_loop, args=(config,), daemon=True)

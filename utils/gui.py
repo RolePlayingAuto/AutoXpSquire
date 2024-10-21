@@ -8,8 +8,8 @@ import pygetwindow as gw
 
 import utils.shared as shared
 from utils.auto_attack import start_auto_attack, stop_auto_attack
-from utils.hp_mp import start_hp_mp_check, stop_hp_mp_check
 from utils.auto_buff import start_auto_buff, stop_auto_buff
+from utils.hp_mp import start_hp_mp_check, stop_hp_mp_check
 from utils.loader import load_skill_data, write_config_to_file
 from utils.logger import get_logger
 
@@ -133,10 +133,10 @@ def create_gui() -> None:
             logger.info("hp_mp_check thread found, stopping hp_mp_check")
             stop_hp_mp_check(shared.hp_mp_check_thread)
             shared.hp_mp_check_thread = None
-        if shared.auto_buff_thread:
+        if shared.buff_thread:
             logger.info("auto_buff thread found, stopping auto_buff")
             stop_auto_buff(shared.buff_thread)
-            shared.auto_buff_thread = None
+            shared.buff_thread = None
         logger.info("Bot stopped")
 
     # Start and Stop buttons

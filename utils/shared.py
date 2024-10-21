@@ -1,5 +1,5 @@
 '''To implement shared variables between different modules'''
-from threading import Thread, Event
+from threading import Event, Thread
 from typing import Optional
 
 from utils.loader import load_config
