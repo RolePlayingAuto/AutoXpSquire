@@ -44,7 +44,6 @@ def buff_loop(config: dict) -> None:
         return
 
     while not shared.stop_auto_buff_event.is_set():
-        shared.stop_auto_attack_event.set()
         for skill in buff_skills:
             # Construct the icon path
             icon_path = f"static/{config['attack_settings']['selected_class'].
@@ -63,21 +62,20 @@ def buff_loop(config: dict) -> None:
             if template is None:
                 logger.error(f"Failed to load template image for {skill['name']}")
                 continue
-
             # Perform template matching
             res = cv2.matchTemplate(screenshot, template, cv2.TM_CCOEFF_NORMED)
-            threshold = 0.8
-            loc = np.where(res >= threshold)
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+            threshold = 0.45
 
-            if len(loc[0]) == 0:
+            if max_val < threshold:
+                logger.info(f"Max match value: {max_val} for {skill['name']}")
+                shared.stop_auto_attack_event.set()
                 # Icon not found, cast buff
                 logger.info(f"Casting buff {skill['name']}")
-                time.sleep(0.1)
                 pydirectinput.press(skill["skill_bar"])
                 pydirectinput.press(skill["slot"])
-                time.sleep(0.1)
+                time.sleep(4)
+                shared.stop_auto_attack_event.clear()
             else:
                 logger.debug(f"Buff {skill['name']} is active.")
-
-        time.sleep(4)  # Wait before next check
-    shared.stop_auto_attack_event.clear()
+    time.sleep(1)
