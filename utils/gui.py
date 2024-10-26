@@ -312,7 +312,8 @@ def create_gui() -> None:
                 skill_label.grid(row=0, column=0, padx=5)
 
             # Name
-            tk.Label(buff_frame, text=buff['name'], font=("Arial", 10), width=15).grid(row=0, column=1, padx=5, sticky='w')
+            tk.Label(buff_frame, text=buff['name'],
+                     font=("Arial", 10), width=15).grid(row=0, column=1, padx=5, sticky='w')
 
             # "Party?" checkbox
             party_var = tk.BooleanVar(value=buff.get('party', False))
@@ -352,7 +353,8 @@ def create_gui() -> None:
                         skill['cooldown'] = cooldown
                         break
 
-            cooldown_entry.bind("<FocusOut>", lambda e, skill_name=buff['name'], cooldown_entry=cooldown_entry: save_cooldown(skill_name, cooldown_entry))
+            cooldown_entry.bind("<FocusOut>", lambda e, skill_name=buff['name'],
+                                cooldown_entry=cooldown_entry: save_cooldown(skill_name, cooldown_entry))
 
     def update_heal_settings() -> None:
         # Clear the current contents of heal_settings_tab
