@@ -280,7 +280,7 @@ def create_gui() -> None:
         header_frame.columnconfigure(0, weight=0)  # Icon
         header_frame.columnconfigure(1, weight=0)  # Skill Name
         header_frame.columnconfigure(2, weight=0)  # Party?
-        header_frame.columnconfigure(3, weight=0)  # Cooldown        
+        header_frame.columnconfigure(3, weight=0)  # Cooldown
 
         tk.Label(header_frame, text="Icon", font=("Arial", 10, "bold"), width=10).grid(row=0, column=0, padx=0)
         tk.Label(header_frame, text="Skill Name", font=("Arial", 10, "bold"), width=10).grid(row=0, column=1, padx=0)
@@ -296,7 +296,7 @@ def create_gui() -> None:
             buff_frame.columnconfigure(0, weight=0)  # Icon
             buff_frame.columnconfigure(1, weight=0)  # Skill Name
             buff_frame.columnconfigure(2, weight=0)  # Party?
-            buff_frame.columnconfigure(3, weight=0)  # Cooldown            
+            buff_frame.columnconfigure(3, weight=0)  # Cooldown
 
             # Icon
             skill_icon_path = f"static/{shared.config['attack_settings']['selected_class'].
