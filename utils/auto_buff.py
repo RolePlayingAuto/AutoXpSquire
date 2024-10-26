@@ -45,7 +45,7 @@ def buff_loop(config: dict) -> None:
         return
 
     # Initialize last cast times for each buff skill
-    last_cast_times = {skill["name"]: 0 for skill in buff_skills}
+    last_cast_times = {skill["name"]: 0.0 for skill in buff_skills}
 
     while not shared.stop_auto_buff_event.is_set():
         current_time = time.time()  # Current time in seconds
