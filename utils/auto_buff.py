@@ -32,7 +32,7 @@ def stop_auto_buff(buff_thread: threading.Thread) -> None:
 
 
 def buff_loop(config: dict) -> None:
-    buff_skills = [skill for skill in config["attack_settings"]["skills"] 
+    buff_skills = [skill for skill in config["attack_settings"]["skills"]
                    if skill["buff"] and skill["enabled"]]
 
     if not buff_skills:
