@@ -15,8 +15,9 @@ def auto_attack_function(config: dict) -> None:
                       if skill["enabled"] and not skill["buff"] and not skill["heal"]]
     shared.resume_attack_event.set()
     while config['auto_attack_toggle'] and not shared.stop_auto_attack_event.is_set():
-        # Continuously press 'Z' to target
-        pydirectinput.press('z')
+        # Continuously target if enabled
+        if attack_settings.get("enable_auto_target", False):
+            pydirectinput.press(config["attack_settings"]["auto_target_key"])
         time.sleep(0.01)
 
         # Execute selected skills
@@ -29,8 +30,9 @@ def auto_attack_function(config: dict) -> None:
             pydirectinput.press(skill["slot"])
             # Continuously press 'R' if enabled
             if attack_settings.get("enable_basic_attack", False):
-                pydirectinput.press('r')
-            pydirectinput.press('z')
+                pydirectinput.press(config["attack_settings"]["basic_attack_key"])
+            if attack_settings.get("enable_auto_target", False):
+                pydirectinput.press(config["attack_settings"]["auto_target_key"])
             # Increase delay between skill activations
             time.sleep(0.15)
 
