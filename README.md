@@ -23,7 +23,7 @@ Helper for your RPG fantasies to become the best Knight via Python
 - Enter auto pot thresholds and pot keys.
 
 ### Attack Settings
-- Enable R auto attack if you want it in.
+- Enable basic auto attack and auto targeting if you want it in. Enter the target or basic attack key in lower case. Basic attack key is pressed before every skill.
 - Classes and skills will be loaded from the `config/skill_data.yml` file. Enter any type of class skills and skills types in the file following example format to show your classes and skills here. Skill images can optionally be stored in `static/` folder to see them in GUI. Image names should follow `{class_name}_{skill_type}_{skill_name}` format.
 - Tick the skills you want to be used, enter their skill bar shortcuts and skill slot shortcuts. Example Skill bar `F4` Slot `5`.
 
