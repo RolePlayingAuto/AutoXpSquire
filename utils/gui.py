@@ -331,7 +331,7 @@ def create_gui() -> None:
             party_checkbox.grid(row=0, column=2, padx=5)
 
             # Cooldown Entry
-            cooldown_entry = tk.Entry(buff_frame, width=15) # type: ignore[misc]
+            cooldown_entry = tk.Entry(buff_frame, width=15)  # type: ignore[misc]
             cooldown_entry.grid(row=0, column=3, padx=5)
 
             cooldown_value = buff.get('cooldown', 0)  # Default to 0
@@ -354,7 +354,8 @@ def create_gui() -> None:
                         break
 
             cooldown_entry.bind("<FocusOut>", lambda e, skill_name=buff['name'],
-                                cooldown_entry=cooldown_entry: save_cooldown(skill_name, cooldown_entry)) # type: ignore[misc]
+                                cooldown_entry=cooldown_entry: save_cooldown(
+                                    skill_name, cooldown_entry))  # type: ignore[misc]
 
     def update_heal_settings() -> None:
         # Clear the current contents of heal_settings_tab
