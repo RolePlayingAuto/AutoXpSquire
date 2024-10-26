@@ -385,6 +385,59 @@ def create_gui() -> None:
     enable_basic_attack_checkbox.grid(row=row, column=0, columnspan=2, sticky='nsew', padx=5, pady=5)
     row += 1
 
+    # Basic Attack Key
+    tk.Label(attack_settings_top_frame, text="Basic Attack Key:", font=("Arial", 10)).grid(
+        row=row, column=0, sticky='e', padx=5, pady=4
+    )
+    basic_attack_key_var = tk.StringVar()
+    basic_attack_key_entry = tk.Entry(
+        attack_settings_top_frame,
+        textvariable=basic_attack_key_var
+    )
+    basic_attack_key_var.set(shared.config["attack_settings"].get("basic_attack_key", ""))
+    basic_attack_key_entry.grid(row=row, column=1, sticky='w', padx=5, pady=4)
+
+    # Enable Auto Target checkbox
+    row += 1
+    enable_auto_target_var = tk.BooleanVar()
+    enable_auto_target_checkbox = tk.Checkbutton(
+        attack_settings_top_frame,
+        text="Enable Auto Target",
+        variable=enable_auto_target_var,
+        command=lambda: shared.config["attack_settings"].__setitem__(
+            "enable_auto_target",
+            enable_auto_target_var.get()
+        )
+    )
+    enable_auto_target_var.set(shared.config["attack_settings"].get("enable_auto_target", False))
+    enable_auto_target_checkbox.grid(row=row, column=0, columnspan=2, sticky='nsew', padx=5, pady=5)
+
+    # Auto Target Key
+    row += 1
+    tk.Label(attack_settings_top_frame, text="Auto Target Key:", font=("Arial", 10)).grid(
+        row=row, column=0, sticky='e', padx=5, pady=4
+    )
+    auto_target_key_var = tk.StringVar()
+    auto_target_key_entry = tk.Entry(
+        attack_settings_top_frame,
+        textvariable=auto_target_key_var
+    )
+    auto_target_key_var.set(shared.config["attack_settings"].get("auto_target_key", ""))
+    auto_target_key_entry.grid(row=row, column=1, sticky='w', padx=5, pady=4)
+
+    # Update config on entry changes
+    basic_attack_key_var.trace_add("write", lambda *args: shared.config["attack_settings"].
+                                   __setitem__("basic_attack_key", basic_attack_key_var.get()))
+    auto_target_key_var.trace_add("write", lambda *args: shared.config["attack_settings"].
+                                  __setitem__("auto_target_key", auto_target_key_var.get()))
+    enable_auto_target_var.trace_add("write", lambda *args: shared.config["attack_settings"].
+                                     __setitem__("enable_auto_target", enable_auto_target_var.get()))
+    enable_basic_attack_var.trace_add("write", lambda *args: shared.config["attack_settings"].
+                                      __setitem__("enable_basic_attack", enable_basic_attack_var.get()))
+
+    # Increment the row again for the Select Class frame
+    row += 1
+
     # Create a frame to hold 'Select Class' label and combobox
     select_class_frame = tk.Frame(attack_settings_top_frame)
     select_class_frame.grid(row=row, column=0, columnspan=2, sticky='nsew', padx=5, pady=4)

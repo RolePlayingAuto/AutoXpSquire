@@ -32,6 +32,7 @@ def load_config(config_file: str = "config/config.yml") -> dict:
 
         attack_settings = config.get("attack_settings", {})
         enable_basic_attack = attack_settings.get("enable_basic_attack", False)
+        enable_auto_target = attack_settings.get("enable_auto_target", False)
         selected_class = attack_settings.get("selected_class", None)
         skills = attack_settings.get("skills", [])
 
@@ -53,7 +54,10 @@ def load_config(config_file: str = "config/config.yml") -> dict:
             "attack_settings": {
                 "enable_basic_attack": enable_basic_attack,
                 "selected_class": selected_class,
-                "skills": skills
+                "skills": skills,
+                "enable_auto_target": enable_auto_target,
+                "basic_attack_key": attack_settings.get("basic_attack_key", 'r'),
+                "auto_target_key": attack_settings.get("auto_target_key", 'z')
             },
             "class_options": class_options
         }
