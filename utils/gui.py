@@ -337,7 +337,8 @@ def create_gui() -> None:
             cooldown_value = buff.get('cooldown', 0)  # Default to 0
             cooldown_entry.insert(0, str(cooldown_value))
 
-            def save_cooldown(skill_name=buff['name'], cooldown_entry=cooldown_entry) -> None:
+            def save_cooldown(event: tk.Event, skill_name: str = buff['name'],
+                              cooldown_entry: tk.Entry = cooldown_entry) -> None:
                 cooldown_text = cooldown_entry.get().strip()
                 if cooldown_text == '':
                     cooldown = 0
@@ -353,9 +354,7 @@ def create_gui() -> None:
                         skill['cooldown'] = cooldown
                         break
 
-            cooldown_entry.bind("<FocusOut>", lambda e, skill_name=buff['name'],
-                                cooldown_entry=cooldown_entry: save_cooldown(
-                                    skill_name, cooldown_entry))  # type: ignore[misc]
+                cooldown_entry.bind("<FocusOut>", save_cooldown)
 
     def update_heal_settings() -> None:
         # Clear the current contents of heal_settings_tab
