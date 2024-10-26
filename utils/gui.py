@@ -354,7 +354,7 @@ def create_gui() -> None:
                         skill['cooldown'] = cooldown
                         break
 
-                cooldown_entry.bind("<FocusOut>", save_cooldown)
+            cooldown_entry.bind("<FocusOut>", save_cooldown)
 
     def update_heal_settings() -> None:
         # Clear the current contents of heal_settings_tab

@@ -32,7 +32,8 @@ def stop_auto_buff(buff_thread: threading.Thread) -> None:
 
 
 def buff_loop(config: dict) -> None:
-    buff_skills = [skill for skill in config["attack_settings"]["skills"] if skill["buff"] and skill["enabled"]]
+    buff_skills = [skill for skill in config["attack_settings"]["skills"] 
+                   if skill["buff"] and skill["enabled"]]
 
     if not buff_skills:
         logger.info("No buff skills configured.")
@@ -43,8 +44,21 @@ def buff_loop(config: dict) -> None:
         logger.error("Buff coordinates not set.")
         return
 
+    # Initialize last cast times for each buff skill
+    last_cast_times = {skill["name"]: 0 for skill in buff_skills}
+
     while not shared.stop_auto_buff_event.is_set():
+        current_time = time.time()  # Current time in seconds
+
         for skill in buff_skills:
+            # Get the cooldown for the skill (in milliseconds)
+            cooldown_s = skill.get("cooldown", 0)
+            # Check if cooldown period has passed since last cast
+            time_since_last_cast = current_time - last_cast_times[skill["name"]]
+            if time_since_last_cast < cooldown_s:
+                # Cooldown period has not passed; skip checking this buff
+                continue
+
             # Construct the icon path
             icon_path = f"static/{config['attack_settings']['selected_class'].
                                   lower()}_{skill['subclass'].lower()}_{skill['name'].lower()}.png"
@@ -68,14 +82,15 @@ def buff_loop(config: dict) -> None:
             threshold = 0.75
 
             if max_val < threshold:
-                logger.debug(f"Max match value: {max_val} for {skill['name']}")
+                logger.debug(f"Buff {skill['name']} is missing (max_val={max_val}).")
                 shared.resume_attack_event.clear()
-                # Icon not found, cast buff
                 logger.info(f"Casting buff {skill['name']}")
                 pydirectinput.press(skill["skill_bar"])
                 pydirectinput.press(skill["slot"])
-                time.sleep(3)
+                last_cast_times[skill["name"]] = time.time()
+                time.sleep(2)
                 shared.resume_attack_event.set()
             else:
                 logger.debug(f"Buff {skill['name']} is active.")
-    time.sleep(1)
+
+    time.sleep(0.5)
