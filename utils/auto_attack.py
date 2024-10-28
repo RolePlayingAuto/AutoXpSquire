@@ -15,10 +15,15 @@ def auto_attack_function(config: dict) -> None:
                       if skill["enabled"] and not skill["buff"] and not skill["heal"]]
     shared.resume_attack_event.set()
     while config['auto_attack_toggle'] and not shared.stop_auto_attack_event.is_set():
+        if not shared.resume_attack_event.is_set():
+            time.sleep(0.1)
+            continue
         auto_target(config)
         basic_attack(config)
         # Execute selected skills
         for skill in enabled_skills:
+            if shared.stop_auto_attack_event.is_set():
+                break
             if not shared.resume_attack_event.is_set():
                 time.sleep(0.1)
                 continue
