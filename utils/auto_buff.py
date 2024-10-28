@@ -53,6 +53,7 @@ def buff_loop(config: dict) -> None:
         for skill in buff_skills:
             # Get the cooldown for the skill (in milliseconds)
             cooldown_s = skill.get("cooldown", 0)
+            cast_time_s = skill.get('cast_time', 0) / 1000.0
             # Check if cooldown period has passed since last cast
             time_since_last_cast = current_time - last_cast_times[skill["name"]]
             if time_since_last_cast < cooldown_s:
@@ -88,7 +89,7 @@ def buff_loop(config: dict) -> None:
                 pydirectinput.press(skill["skill_bar"])
                 pydirectinput.press(skill["slot"])
                 last_cast_times[skill["name"]] = time.time()
-                time.sleep(2)
+                time.sleep(cast_time_s)
                 shared.resume_attack_event.set()
             else:
                 logger.debug(f"Buff {skill['name']} is active.")
