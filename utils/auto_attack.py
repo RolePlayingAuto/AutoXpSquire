@@ -18,13 +18,17 @@ def auto_attack_function(config: dict) -> None:
         # Continuously target if enabled
         if attack_settings.get("enable_auto_target", False):
             pydirectinput.press(config["attack_settings"]["auto_target_key"])
-        time.sleep(0.01)
-
+        if attack_settings.get("enable_basic_attack", False):
+            pydirectinput.press(config["attack_settings"]["basic_attack_key"])
         # Execute selected skills
         for skill in enabled_skills:
             if not shared.resume_attack_event.is_set():
                 time.sleep(0.1)
                 continue
+            if attack_settings.get("enable_auto_target", False):
+                pydirectinput.press(config["attack_settings"]["auto_target_key"])
+            if attack_settings.get("enable_basic_attack", False):
+                pydirectinput.press(config["attack_settings"]["basic_attack_key"])
             logger.info(f"Attempting skill: {skill['name']}")
             pydirectinput.press(skill["skill_bar"])
             pydirectinput.press(skill["slot"])
@@ -35,6 +39,7 @@ def auto_attack_function(config: dict) -> None:
                 pydirectinput.press(config["attack_settings"]["auto_target_key"])
             # Increase delay between skill activations
             time.sleep(0.15)
+        time.sleep(0.15)
 
 
 def start_auto_attack(config: dict) -> threading.Thread | None:
