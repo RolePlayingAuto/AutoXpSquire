@@ -291,7 +291,8 @@ def create_gui() -> None:
         tk.Label(header_frame, text="Skill Name", font=("Arial", 10, "bold"), width=10).grid(row=0, column=1, padx=0)
         tk.Label(header_frame, text="Party?", font=("Arial", 10, "bold"), width=10).grid(row=0, column=2, padx=0)
         tk.Label(header_frame, text="Cooldown (s)", font=("Arial", 10, "bold"), width=10).grid(row=0, column=3, padx=0)
-        tk.Label(header_frame, text="Cast Time (ms)", font=("Arial", 10, "bold"), width=12).grid(row=0, column=4, padx=0)
+        tk.Label(header_frame, text="Cast Time (ms)", font=("Arial", 10, "bold"),
+                 width=12).grid(row=0, column=4, padx=0)
 
         # For each buff, display the icon, name, and "Party?" checkbox
         for buff in buffs:
