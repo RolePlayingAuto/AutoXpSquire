@@ -23,7 +23,7 @@ Helper for your RPG fantasies to become the best Knight via Python
 - Enter auto pot thresholds and pot keys.
 
 ### Attack Settings
-- Enable basic auto attack and auto targeting if you want it in. Enter the target or basic attack key in lower case. Basic attack key is pressed before every skill.
+- Enable basic auto attack and auto targeting if you want it in. Enter the target or basic attack key in lower case. Basic attack key is pressed before and after every skill. If the game you are using with enables basic attack with skill cast or doesnt have animation cancel with basic skill you should not use it.
 - Classes and skills will be loaded from the `config/skill_data.yml` file. Enter any type of class skills and skills types in the file following example format to show your classes and skills here. Skill images can optionally be stored in `static/` folder to see them in GUI. Image names should follow `{class_name}_{skill_type}_{skill_name}` format.
 - Tick the skills you want to be used, enter their skill bar shortcuts and skill slot shortcuts. Example Skill bar `F4` Slot `5`.
 
@@ -32,4 +32,4 @@ Helper for your RPG fantasies to become the best Knight via Python
 - From the `Skill Settings` Tab tick the `buff` for any skill that you want registered as a buff. This will add the skill to `Buff Settings` Tab under `Settings` Tab.
 - Tick the `Activate` for the buff that you want it to be checked for and cast.
 - Under Settings -> Buff Settings click `Select Coordinates` and select the area you want the program to search for the buff icon. This is for you to select a specific part so that program doesnt recognize buff skill icon on skill bar or skill list and only checks buff icon location.
-- Current buff cast waiting time is 3 seconds to be changed to be dynamic later on.
+- Set the buff casting time (in miliseconds) and buff cooldowns (in seconds) at Settings -> Buff Settings, these are needed for smooth buffing and not try to buff while skill is on cooldown.
