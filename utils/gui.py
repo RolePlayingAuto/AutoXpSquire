@@ -17,6 +17,7 @@ logger = get_logger(__name__)
 # Globals
 target_window = None
 
+
 def create_gui() -> None:
     skill_data = load_skill_data()
     window = tk.Tk()
@@ -282,7 +283,7 @@ def create_gui() -> None:
     )
     basic_attack_key_var.set(shared.config["attack_settings"].get("basic_attack_key", ""))
     basic_attack_key_entry.grid(row=row, column=1, sticky='w', padx=5, pady=4)
-    row +=1
+    row += 1
 
     # Enable Auto Target checkbox
     enable_auto_target_var = tk.BooleanVar()
@@ -321,6 +322,54 @@ def create_gui() -> None:
                                      __setitem__("enable_auto_target", enable_auto_target_var.get()))
     enable_basic_attack_var.trace_add("write", lambda *args: shared.config["attack_settings"].
                                       __setitem__("enable_basic_attack", enable_basic_attack_var.get()))
+
+    # Monster Name Coordinates section (coordinate selector for monster names)
+    monster_coord_frame = tk.Frame(attack_settings_frame)
+    monster_coord_frame.pack(fill='x', padx=5, pady=5)
+
+    # Button for selecting coordinates, placed at the top, centered, and with a smaller width
+    select_monster_coord_button = tk.Button(
+        monster_coord_frame,
+        text="Select Monster Name Coordinates",
+        command=lambda: select_region(update_monster_name_coord),
+        width=25  # Smaller width for button
+    )
+    select_monster_coord_button.pack(pady=5)  # Centered alignment
+
+    # Label to display coordinates below the button
+    monster_coord_label = tk.Label(
+        monster_coord_frame,
+        text=f"Monster Name Coordinates: {shared.config['attack_settings'].get('monster_name_coord', 'Not Selected')}",
+        font=("Arial", 10),
+        anchor='center',  # Left alignment of text within label
+        justify='center'
+    )
+    monster_coord_label.pack(side='top', padx=5, pady=(5, 0), fill='x')
+
+    def update_monster_name_coord(region: Tuple[int, int, int, int]) -> None:
+        # Save the coordinate to shared.config
+        shared.config["attack_settings"]["monster_name_coord"] = region
+        # Update label text to show selected coordinates below
+        monster_coord_label.config(text=f"Monster Name Coordinates:\n{region}")
+
+    # Monster Names Entry Section
+    tk.Label(attack_settings_frame, text="Monster Names (comma-separated):", font=("Arial", 10)).pack(pady=(10, 5))
+
+    monster_name_var = tk.StringVar()
+    monster_name_entry = tk.Entry(attack_settings_frame, textvariable=monster_name_var, width=50)
+    monster_name_entry.pack(pady=(5, 10))
+
+    # Load saved monster names if available in config
+    if "monster_names" in shared.config["attack_settings"]:
+        monster_name_var.set(", ".join(shared.config["attack_settings"]["monster_names"]))
+
+    def save_monster_names() -> None:
+        # Get the monster names, split by commas, and save to the config
+        monster_names = [name.strip() for name in monster_name_var.get().split(',') if name.strip()]
+        shared.config["attack_settings"]["monster_names"] = monster_names
+
+    # Save the monster names on entry change
+    monster_name_var.trace_add("write", lambda *args: save_monster_names())
 
     # Buff Settings Tab content
     def update_buff_settings() -> None:
