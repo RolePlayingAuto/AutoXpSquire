@@ -26,10 +26,10 @@ def create_gui() -> None:
     tab_control = ttk.Notebook(window)
     control_tab = ttk.Frame(tab_control)
     settings_tab = ttk.Frame(tab_control)
-    attack_settings_tab = ttk.Frame(tab_control)
+    skill_settings_tab = ttk.Frame(tab_control)
     tab_control.add(control_tab, text="Control")
     tab_control.add(settings_tab, text="Settings")
-    tab_control.add(attack_settings_tab, text="Skill Settings")
+    tab_control.add(skill_settings_tab, text="Skill Settings")
     tab_control.pack(expand=1, fill="both")
 
     # Control Tab
@@ -139,10 +139,12 @@ def create_gui() -> None:
     settings_notebook.pack(expand=1, fill="both")
 
     hp_mp_tab = ttk.Frame(settings_notebook)
+    attack_settings_tab = ttk.Frame(settings_notebook)
     buff_settings_tab = ttk.Frame(settings_notebook)
     heal_settings_tab = ttk.Frame(settings_notebook)
     other_settings_tab = ttk.Frame(settings_notebook)
     settings_notebook.add(hp_mp_tab, text="HP/MP")
+    settings_notebook.add(attack_settings_tab, text="Attack Settings")
     settings_notebook.add(buff_settings_tab, text="Buff Settings")
     settings_notebook.add(heal_settings_tab, text="Heal Settings")
     settings_notebook.add(other_settings_tab, text="Other Settings")
@@ -446,20 +448,20 @@ def create_gui() -> None:
             party_checkbox.pack(side='left', padx=5)
 
     # Skill Settings Tab
-    tk.Label(attack_settings_tab, text="Skill Settings", font=("Arial", 12, "bold")).pack(pady=10)
+    tk.Label(skill_settings_tab, text="Skill Settings", font=("Arial", 12, "bold")).pack(pady=10)
 
     # Top frame for Enable Basic Attack and Select Class
-    attack_settings_top_frame = tk.Frame(attack_settings_tab)
-    attack_settings_top_frame.pack(fill='x')
+    skill_settings_top_frame = tk.Frame(skill_settings_tab)
+    skill_settings_top_frame.pack(fill='x')
 
     # Configure columns in attack_settings_top_frame
-    attack_settings_top_frame.columnconfigure(0, weight=1)
-    attack_settings_top_frame.columnconfigure(1, weight=1)
+    skill_settings_top_frame.columnconfigure(0, weight=1)
+    skill_settings_top_frame.columnconfigure(1, weight=1)
 
     row = 0
     enable_basic_attack_var = tk.BooleanVar()
     enable_basic_attack_checkbox = tk.Checkbutton(
-        attack_settings_top_frame,
+        skill_settings_top_frame,
         text="Enable Basic Attack",
         variable=enable_basic_attack_var,
         command=lambda: shared.config["attack_settings"].__setitem__(
@@ -472,12 +474,12 @@ def create_gui() -> None:
     row += 1
 
     # Basic Attack Key
-    tk.Label(attack_settings_top_frame, text="Basic Attack Key:", font=("Arial", 10)).grid(
+    tk.Label(skill_settings_top_frame, text="Basic Attack Key:", font=("Arial", 10)).grid(
         row=row, column=0, sticky='e', padx=5, pady=4
     )
     basic_attack_key_var = tk.StringVar()
     basic_attack_key_entry = tk.Entry(
-        attack_settings_top_frame,
+        skill_settings_top_frame,
         textvariable=basic_attack_key_var
     )
     basic_attack_key_var.set(shared.config["attack_settings"].get("basic_attack_key", ""))
@@ -487,7 +489,7 @@ def create_gui() -> None:
     row += 1
     enable_auto_target_var = tk.BooleanVar()
     enable_auto_target_checkbox = tk.Checkbutton(
-        attack_settings_top_frame,
+        skill_settings_top_frame,
         text="Enable Auto Target",
         variable=enable_auto_target_var,
         command=lambda: shared.config["attack_settings"].__setitem__(
@@ -500,12 +502,12 @@ def create_gui() -> None:
 
     # Auto Target Key
     row += 1
-    tk.Label(attack_settings_top_frame, text="Auto Target Key:", font=("Arial", 10)).grid(
+    tk.Label(skill_settings_top_frame, text="Auto Target Key:", font=("Arial", 10)).grid(
         row=row, column=0, sticky='e', padx=5, pady=4
     )
     auto_target_key_var = tk.StringVar()
     auto_target_key_entry = tk.Entry(
-        attack_settings_top_frame,
+        skill_settings_top_frame,
         textvariable=auto_target_key_var
     )
     auto_target_key_var.set(shared.config["attack_settings"].get("auto_target_key", ""))
@@ -525,7 +527,7 @@ def create_gui() -> None:
     row += 1
 
     # Create a frame to hold 'Select Class' label and combobox
-    select_class_frame = tk.Frame(attack_settings_top_frame)
+    select_class_frame = tk.Frame(skill_settings_top_frame)
     select_class_frame.grid(row=row, column=0, columnspan=2, sticky='nsew', padx=5, pady=4)
 
     # Configure columns in select_class_frame
@@ -556,17 +558,17 @@ def create_gui() -> None:
     row += 1
 
     # Scrollable frame for skill tree
-    scrollable_attack_settings_frame = add_scrollable_frame(attack_settings_tab)
+    scrollable_skill_settings_frame = add_scrollable_frame(skill_settings_tab)
 
     # Configure columns
-    scrollable_attack_settings_frame.columnconfigure(0, weight=1)
-    scrollable_attack_settings_frame.columnconfigure(1, weight=1)
+    scrollable_skill_settings_frame.columnconfigure(0, weight=1)
+    scrollable_skill_settings_frame.columnconfigure(1, weight=1)
 
     # Skill tree frame with notebook
-    subclass_notebook = ttk.Notebook(scrollable_attack_settings_frame)
+    subclass_notebook = ttk.Notebook(scrollable_skill_settings_frame)
     subclass_notebook.grid(row=0, column=0, columnspan=2, sticky='nsew', padx=5, pady=5)
-    scrollable_attack_settings_frame.rowconfigure(0, weight=1)
-    scrollable_attack_settings_frame.columnconfigure(1, weight=1)
+    scrollable_skill_settings_frame.rowconfigure(0, weight=1)
+    scrollable_skill_settings_frame.columnconfigure(1, weight=1)
 
     def update_subclasses(*args) -> None:
         # Clean Old Widgets
