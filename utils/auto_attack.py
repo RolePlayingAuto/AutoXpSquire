@@ -5,7 +5,7 @@ from difflib import SequenceMatcher
 import easyocr
 import numpy as np
 import pydirectinput
-from PIL import ImageGrab
+from PIL import ImageGrab, Image
 
 import utils.shared as shared
 from utils.logger import get_logger
@@ -57,17 +57,6 @@ def auto_attack_function(config: dict) -> None:
 
             basic_attack(config)
             use_skill(skill)
-            auto_target(config)
-
-            if config["attack_settings"].get("monster_name_coord"):
-                if monster_names:
-                    detected_text = ocr_extract_text(config["attack_settings"]["monster_name_coord"], monster_names)
-                    logger.info(f"Detected text: {detected_text}")
-
-                    if detected_text not in monster_names:
-                        logger.info(f"{detected_text} not in monster list, skipping this target.")
-                        continue
-
             basic_attack(config)
             # Increase delay between skill activations
             time.sleep(0.1)
@@ -119,7 +108,19 @@ def ocr_extract_text(region: tuple, monster_names: list) -> str:
     screenshot_np = np.array(screenshot)
 
     # Use EasyOCR to extract text along with their confidence scores
-    result = reader.readtext(screenshot_np)
+    result = reader.readtext(
+        screenshot_np,
+        allowlist='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ][)(',
+        detail=1,
+        adjust_contrast=0.0,
+        contrast_ths=0.0,
+        paragraph=False,
+        decoder='greedy',
+        beamWidth=1,
+        batch_size=1,
+        workers=0,
+        mag_ratio=1.0
+    )
 
     # Find the detection with the highest confidence score
     best_text = ""
