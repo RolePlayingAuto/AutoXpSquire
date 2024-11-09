@@ -5,7 +5,7 @@ from difflib import SequenceMatcher
 import easyocr
 import numpy as np
 import pydirectinput
-from PIL import ImageGrab, Image
+from PIL import ImageGrab
 
 import utils.shared as shared
 from utils.logger import get_logger
