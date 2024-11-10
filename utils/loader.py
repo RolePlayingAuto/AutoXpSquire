@@ -35,9 +35,6 @@ def load_config(config_file: str = "config/config.yml") -> dict:
         enable_auto_target = attack_settings.get("enable_auto_target", False)
         selected_class = attack_settings.get("selected_class", None)
         skills = attack_settings.get("skills", [])
-        monster_name_coord = attack_settings.get("monster_name_coord", None)
-        monster_names = attack_settings.get("monster_names", [])     
-
         class_options = config.get("class_options", ["Rogue", "Mage", "Priest", "Warrior"])
 
         # Return the full configuration as a dictionary
@@ -60,8 +57,9 @@ def load_config(config_file: str = "config/config.yml") -> dict:
                 "enable_auto_target": enable_auto_target,
                 "basic_attack_key": attack_settings.get("basic_attack_key", 'r'),
                 "auto_target_key": attack_settings.get("auto_target_key", 'z'),
-                "monster_name_coord": monster_name_coord,
-                "monster_names": monster_names,              
+                "monster_name_coord": attack_settings.get("monster_name_coord", None),
+                "monster_names": attack_settings.get("monster_names", []),
+                "monster_whitelist": attack_settings.get("monster_whitelist", False)
             },
             "class_options": class_options
         }

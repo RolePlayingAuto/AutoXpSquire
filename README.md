@@ -26,6 +26,7 @@ Helper for your RPG fantasies to become the best Knight via Python
 - Enable basic auto attack and auto targeting if you want it in. Enter the target or basic attack key in lower case. Basic attack key is pressed before and after every skill. If the game you are using with enables basic attack with skill cast or doesnt have animation cancel with basic skill you should not use it.
 - Classes and skills will be loaded from the `config/skill_data.yml` file. Enter any type of class skills and skills types in the file following example format to show your classes and skills here. Skill images can optionally be stored in `static/` folder to see them in GUI. Image names should follow `{class_name}_{skill_type}_{skill_name}` format.
 - Tick the skills you want to be used, enter their skill bar shortcuts and skill slot shortcuts. Example Skill bar `F4` Slot `5`.
+- You can select monster name coordinates and give a list of monster names to attack for whitelisting mobs so that it wont try to attack any mob outside the list. Seperates multiple mob names as `mob 1,mob 2`
 
 ### Buff Settings
 - For any buff skill to be recognized and cast, their template image needs to be in `static/` with correct naming.

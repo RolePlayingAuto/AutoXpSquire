@@ -27,14 +27,9 @@ def auto_attack_function(config: dict) -> None:
             continue
         auto_target(config)
 
-        if config["attack_settings"].get("monster_name_coord"):
-            if monster_names:
-                detected_text = ocr_extract_text(config["attack_settings"]["monster_name_coord"], monster_names)
-                logger.info(f"Detected text: {detected_text}")
-
-                if detected_text not in monster_names:
-                    logger.info(f"{detected_text} not in monster list, skipping this target.")
-                    continue
+        if config["attack_settings"].get("monster_whitelist"):
+            if not is_valid_monster(config, monster_names):
+                continue
 
         basic_attack(config)
         # Execute selected skills
@@ -45,16 +40,9 @@ def auto_attack_function(config: dict) -> None:
                 time.sleep(0.05)
                 continue
             auto_target(config)
-
-            if config["attack_settings"].get("monster_name_coord"):
-                if monster_names:
-                    detected_text = ocr_extract_text(config["attack_settings"]["monster_name_coord"], monster_names)
-                    logger.info(f"Detected text: {detected_text}")
-
-                    if detected_text not in monster_names:
-                        logger.info(f"{detected_text} not in monster list, skipping this target.")
-                        continue
-
+            if config["attack_settings"].get("monster_whitelist"):
+                if not is_valid_monster(config, monster_names):
+                    continue
             basic_attack(config)
             use_skill(skill)
             basic_attack(config)
@@ -148,3 +136,19 @@ def ocr_extract_text(region: tuple, monster_names: list) -> str:
 
     # Return the best match if it meets the 80% threshold, otherwise return an empty string
     return best_match if best_match_score >= 0.8 else detected_text
+
+
+def is_valid_monster(config: dict, monster_names: list) -> bool:
+    if config["attack_settings"].get("monster_name_coord"):
+        if monster_names:
+            detected_text = ocr_extract_text(config["attack_settings"]["monster_name_coord"], monster_names)
+            logger.info(f"Detected text: {detected_text}")
+
+            if detected_text not in monster_names:
+                logger.info(f"{detected_text} not in monster list, skipping this target.")
+                return False
+            else:
+                return True
+    else:
+        logger.error("Monster name coordinates not set.")
+    return False

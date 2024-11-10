@@ -352,6 +352,22 @@ def create_gui() -> None:
         # Update label text to show selected coordinates below
         monster_coord_label.config(text=f"Monster Name Coordinates:\n{region}")
 
+    # Monster Whitelist Checkbox
+    enable_monster_whitelist_var = tk.BooleanVar()
+    enable_monster_whitelist_checkbox = tk.Checkbutton(
+        attack_settings_top_frame,
+        text="Enable Monster Whitelist",
+        variable=enable_monster_whitelist_var,
+        command=lambda: shared.config["attack_settings"].__setitem__(
+            "monster_whitelist",
+            enable_monster_whitelist_var.get()
+        )
+    )
+    enable_monster_whitelist_var.set(shared.config["attack_settings"].get("monster_whitelist", False))
+    enable_monster_whitelist_checkbox.grid(row=row, column=0, columnspan=2, sticky='nsew', padx=5, pady=5)
+    row += 1
+    enable_monster_whitelist_var.trace_add("write", lambda *args: shared.config["attack_settings"].
+                                           __setitem__("monster_whitelist", enable_monster_whitelist_var.get()))
     # Monster Names Entry Section
     tk.Label(attack_settings_frame, text="Monster Names (comma-separated):", font=("Arial", 10)).pack(pady=(10, 5))
 
