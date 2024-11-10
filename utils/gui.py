@@ -26,10 +26,10 @@ def create_gui() -> None:
     tab_control = ttk.Notebook(window)
     control_tab = ttk.Frame(tab_control)
     settings_tab = ttk.Frame(tab_control)
-    attack_settings_tab = ttk.Frame(tab_control)
+    skill_settings_tab = ttk.Frame(tab_control)
     tab_control.add(control_tab, text="Control")
     tab_control.add(settings_tab, text="Settings")
-    tab_control.add(attack_settings_tab, text="Skill Settings")
+    tab_control.add(skill_settings_tab, text="Skill Settings")
     tab_control.pack(expand=1, fill="both")
 
     # Control Tab
@@ -139,10 +139,12 @@ def create_gui() -> None:
     settings_notebook.pack(expand=1, fill="both")
 
     hp_mp_tab = ttk.Frame(settings_notebook)
+    attack_settings_tab = ttk.Frame(settings_notebook)
     buff_settings_tab = ttk.Frame(settings_notebook)
     heal_settings_tab = ttk.Frame(settings_notebook)
     other_settings_tab = ttk.Frame(settings_notebook)
     settings_notebook.add(hp_mp_tab, text="HP/MP")
+    settings_notebook.add(attack_settings_tab, text="Attack Settings")
     settings_notebook.add(buff_settings_tab, text="Buff Settings")
     settings_notebook.add(heal_settings_tab, text="Heal Settings")
     settings_notebook.add(other_settings_tab, text="Other Settings")
@@ -238,11 +240,161 @@ def create_gui() -> None:
     mp_pot_key_entry.insert(0, shared.config.get("mp_pot_key", '2'))
     mp_pot_key_entry.grid(row=1, column=3, padx=5, pady=5, sticky='ew')
 
-    # Buff Settings and Heal Settings functions
+    # Attack Settings Tab content
+    tk.Label(attack_settings_tab, text="Attack Settings", font=("Arial", 12, "bold")).pack(pady=10)
+    attack_settings_frame = tk.Frame(attack_settings_tab)
+    attack_settings_frame.pack(fill="both", expand=True)
+
+    # Configure columns
+    attack_settings_frame.columnconfigure(0, weight=1)
+    attack_settings_frame.columnconfigure(1, weight=1)
+
+    # Create top frame for settings
+    attack_settings_top_frame = tk.Frame(attack_settings_frame)
+    attack_settings_top_frame.pack(fill='x')
+
+    # Configure columns in attack_settings_top_frame
+    attack_settings_top_frame.columnconfigure(0, weight=1)
+    attack_settings_top_frame.columnconfigure(1, weight=1)
+
+    row = 0
+    enable_basic_attack_var = tk.BooleanVar()
+    enable_basic_attack_checkbox = tk.Checkbutton(
+        attack_settings_top_frame,
+        text="Enable Basic Attack",
+        variable=enable_basic_attack_var,
+        command=lambda: shared.config["attack_settings"].__setitem__(
+            "enable_basic_attack",
+            enable_basic_attack_var.get()
+        )
+    )
+    enable_basic_attack_var.set(shared.config["attack_settings"].get("enable_basic_attack", False))
+    enable_basic_attack_checkbox.grid(row=row, column=0, columnspan=2, sticky='nsew', padx=5, pady=5)
+    row += 1
+
+    # Basic Attack Key
+    tk.Label(attack_settings_top_frame, text="Basic Attack Key:", font=("Arial", 10)).grid(
+        row=row, column=0, sticky='e', padx=5, pady=4
+    )
+    basic_attack_key_var = tk.StringVar()
+    basic_attack_key_entry = tk.Entry(
+        attack_settings_top_frame,
+        textvariable=basic_attack_key_var
+    )
+    basic_attack_key_var.set(shared.config["attack_settings"].get("basic_attack_key", ""))
+    basic_attack_key_entry.grid(row=row, column=1, sticky='w', padx=5, pady=4)
+    row += 1
+
+    # Enable Auto Target checkbox
+    enable_auto_target_var = tk.BooleanVar()
+    enable_auto_target_checkbox = tk.Checkbutton(
+        attack_settings_top_frame,
+        text="Enable Auto Target",
+        variable=enable_auto_target_var,
+        command=lambda: shared.config["attack_settings"].__setitem__(
+            "enable_auto_target",
+            enable_auto_target_var.get()
+        )
+    )
+    enable_auto_target_var.set(shared.config["attack_settings"].get("enable_auto_target", False))
+    enable_auto_target_checkbox.grid(row=row, column=0, columnspan=2, sticky='nsew', padx=5, pady=5)
+    row += 1
+
+    # Auto Target Key
+    tk.Label(attack_settings_top_frame, text="Auto Target Key:", font=("Arial", 10)).grid(
+        row=row, column=0, sticky='e', padx=5, pady=4
+    )
+    auto_target_key_var = tk.StringVar()
+    auto_target_key_entry = tk.Entry(
+        attack_settings_top_frame,
+        textvariable=auto_target_key_var
+    )
+    auto_target_key_var.set(shared.config["attack_settings"].get("auto_target_key", ""))
+    auto_target_key_entry.grid(row=row, column=1, sticky='w', padx=5, pady=4)
+    row += 1
+
+    # Update config on entry changes
+    basic_attack_key_var.trace_add("write", lambda *args: shared.config["attack_settings"].
+                                   __setitem__("basic_attack_key", basic_attack_key_var.get()))
+    auto_target_key_var.trace_add("write", lambda *args: shared.config["attack_settings"].
+                                  __setitem__("auto_target_key", auto_target_key_var.get()))
+    enable_auto_target_var.trace_add("write", lambda *args: shared.config["attack_settings"].
+                                     __setitem__("enable_auto_target", enable_auto_target_var.get()))
+    enable_basic_attack_var.trace_add("write", lambda *args: shared.config["attack_settings"].
+                                      __setitem__("enable_basic_attack", enable_basic_attack_var.get()))
+
+    # Monster Name Coordinates section (coordinate selector for monster names)
+    monster_coord_frame = tk.Frame(attack_settings_frame)
+    monster_coord_frame.pack(fill='x', padx=5, pady=5)
+
+    # Button for selecting coordinates, placed at the top, centered, and with a smaller width
+    select_monster_coord_button = tk.Button(
+        monster_coord_frame,
+        text="Select Monster Name Coordinates",
+        command=lambda: select_region(update_monster_name_coord),
+        width=25  # Smaller width for button
+    )
+    select_monster_coord_button.pack(pady=5)  # Centered alignment
+
+    # Label to display coordinates below the button
+    monster_coord_label = tk.Label(
+        monster_coord_frame,
+        text=f"Monster Name Coordinates: {shared.config['attack_settings'].get('monster_name_coord', 'Not Selected')}",
+        font=("Arial", 10),
+        anchor='center',  # Left alignment of text within label
+        justify='center'
+    )
+    monster_coord_label.pack(side='top', padx=5, pady=(5, 0), fill='x')
+
+    def update_monster_name_coord(region: Tuple[int, int, int, int]) -> None:
+        # Save the coordinate to shared.config
+        shared.config["attack_settings"]["monster_name_coord"] = region
+        # Update label text to show selected coordinates below
+        monster_coord_label.config(text=f"Monster Name Coordinates:\n{region}")
+
+    # Monster Whitelist Checkbox
+    enable_monster_whitelist_var = tk.BooleanVar()
+    enable_monster_whitelist_checkbox = tk.Checkbutton(
+        attack_settings_top_frame,
+        text="Enable Monster Whitelist",
+        variable=enable_monster_whitelist_var,
+        command=lambda: shared.config["attack_settings"].__setitem__(
+            "monster_whitelist",
+            enable_monster_whitelist_var.get()
+        )
+    )
+    enable_monster_whitelist_var.set(shared.config["attack_settings"].get("monster_whitelist", False))
+    enable_monster_whitelist_checkbox.grid(row=row, column=0, columnspan=2, sticky='nsew', padx=5, pady=5)
+    row += 1
+    enable_monster_whitelist_var.trace_add("write", lambda *args: shared.config["attack_settings"].
+                                           __setitem__("monster_whitelist", enable_monster_whitelist_var.get()))
+    # Monster Names Entry Section
+    tk.Label(attack_settings_frame, text="Monster Names (comma-separated):", font=("Arial", 10)).pack(pady=(10, 5))
+
+    monster_name_var = tk.StringVar()
+    monster_name_entry = tk.Entry(attack_settings_frame, textvariable=monster_name_var, width=50)
+    monster_name_entry.pack(pady=(5, 10))
+
+    # Load saved monster names if available in config
+    if "monster_names" in shared.config["attack_settings"]:
+        monster_name_var.set(", ".join(shared.config["attack_settings"]["monster_names"]))
+
+    def save_monster_names() -> None:
+        # Get the monster names, split by commas, and save to the config
+        monster_names = [name.strip() for name in monster_name_var.get().split(',') if name.strip()]
+        shared.config["attack_settings"]["monster_names"] = monster_names
+
+    # Save the monster names on entry change
+    monster_name_var.trace_add("write", lambda *args: save_monster_names())
+
+    # Buff Settings Tab content
     def update_buff_settings() -> None:
         # Clear the current contents of buff_settings_tab
         for widget in buff_settings_tab.winfo_children():
             widget.destroy()
+
+        # Add title label
+        tk.Label(buff_settings_tab, text="Buff Settings", font=("Arial", 12, "bold")).pack(pady=10)
 
         # Keep track of cooldown and cast time entries
         buff_cooldown_entries = []
@@ -395,10 +547,14 @@ def create_gui() -> None:
             cooldown_entry.bind("<FocusOut>", save_cooldown)
             cast_time_entry.bind("<FocusOut>", save_cast_time)
 
+    # Heal Settings Tab content
     def update_heal_settings() -> None:
         # Clear the current contents of heal_settings_tab
         for widget in heal_settings_tab.winfo_children():
             widget.destroy()
+
+        # Add title label
+        tk.Label(heal_settings_tab, text="Heal Settings", font=("Arial", 12, "bold")).pack(pady=10)
 
         # Get the list of heals
         heals = [skill for skill in shared.config["attack_settings"].get("skills", []) if skill.get("heal")]
@@ -446,86 +602,20 @@ def create_gui() -> None:
             party_checkbox.pack(side='left', padx=5)
 
     # Skill Settings Tab
-    tk.Label(attack_settings_tab, text="Skill Settings", font=("Arial", 12, "bold")).pack(pady=10)
+    tk.Label(skill_settings_tab, text="Skill Settings", font=("Arial", 12, "bold")).pack(pady=10)
 
     # Top frame for Enable Basic Attack and Select Class
-    attack_settings_top_frame = tk.Frame(attack_settings_tab)
-    attack_settings_top_frame.pack(fill='x')
+    skill_settings_top_frame = tk.Frame(skill_settings_tab)
+    skill_settings_top_frame.pack(fill='x')
 
     # Configure columns in attack_settings_top_frame
-    attack_settings_top_frame.columnconfigure(0, weight=1)
-    attack_settings_top_frame.columnconfigure(1, weight=1)
+    skill_settings_top_frame.columnconfigure(0, weight=1)
+    skill_settings_top_frame.columnconfigure(1, weight=1)
 
     row = 0
-    enable_basic_attack_var = tk.BooleanVar()
-    enable_basic_attack_checkbox = tk.Checkbutton(
-        attack_settings_top_frame,
-        text="Enable Basic Attack",
-        variable=enable_basic_attack_var,
-        command=lambda: shared.config["attack_settings"].__setitem__(
-            "enable_basic_attack",
-            enable_basic_attack_var.get()
-        )
-    )
-    enable_basic_attack_var.set(shared.config["attack_settings"].get("enable_basic_attack", False))
-    enable_basic_attack_checkbox.grid(row=row, column=0, columnspan=2, sticky='nsew', padx=5, pady=5)
-    row += 1
-
-    # Basic Attack Key
-    tk.Label(attack_settings_top_frame, text="Basic Attack Key:", font=("Arial", 10)).grid(
-        row=row, column=0, sticky='e', padx=5, pady=4
-    )
-    basic_attack_key_var = tk.StringVar()
-    basic_attack_key_entry = tk.Entry(
-        attack_settings_top_frame,
-        textvariable=basic_attack_key_var
-    )
-    basic_attack_key_var.set(shared.config["attack_settings"].get("basic_attack_key", ""))
-    basic_attack_key_entry.grid(row=row, column=1, sticky='w', padx=5, pady=4)
-
-    # Enable Auto Target checkbox
-    row += 1
-    enable_auto_target_var = tk.BooleanVar()
-    enable_auto_target_checkbox = tk.Checkbutton(
-        attack_settings_top_frame,
-        text="Enable Auto Target",
-        variable=enable_auto_target_var,
-        command=lambda: shared.config["attack_settings"].__setitem__(
-            "enable_auto_target",
-            enable_auto_target_var.get()
-        )
-    )
-    enable_auto_target_var.set(shared.config["attack_settings"].get("enable_auto_target", False))
-    enable_auto_target_checkbox.grid(row=row, column=0, columnspan=2, sticky='nsew', padx=5, pady=5)
-
-    # Auto Target Key
-    row += 1
-    tk.Label(attack_settings_top_frame, text="Auto Target Key:", font=("Arial", 10)).grid(
-        row=row, column=0, sticky='e', padx=5, pady=4
-    )
-    auto_target_key_var = tk.StringVar()
-    auto_target_key_entry = tk.Entry(
-        attack_settings_top_frame,
-        textvariable=auto_target_key_var
-    )
-    auto_target_key_var.set(shared.config["attack_settings"].get("auto_target_key", ""))
-    auto_target_key_entry.grid(row=row, column=1, sticky='w', padx=5, pady=4)
-
-    # Update config on entry changes
-    basic_attack_key_var.trace_add("write", lambda *args: shared.config["attack_settings"].
-                                   __setitem__("basic_attack_key", basic_attack_key_var.get()))
-    auto_target_key_var.trace_add("write", lambda *args: shared.config["attack_settings"].
-                                  __setitem__("auto_target_key", auto_target_key_var.get()))
-    enable_auto_target_var.trace_add("write", lambda *args: shared.config["attack_settings"].
-                                     __setitem__("enable_auto_target", enable_auto_target_var.get()))
-    enable_basic_attack_var.trace_add("write", lambda *args: shared.config["attack_settings"].
-                                      __setitem__("enable_basic_attack", enable_basic_attack_var.get()))
-
-    # Increment the row again for the Select Class frame
-    row += 1
 
     # Create a frame to hold 'Select Class' label and combobox
-    select_class_frame = tk.Frame(attack_settings_top_frame)
+    select_class_frame = tk.Frame(skill_settings_top_frame)
     select_class_frame.grid(row=row, column=0, columnspan=2, sticky='nsew', padx=5, pady=4)
 
     # Configure columns in select_class_frame
@@ -556,17 +646,17 @@ def create_gui() -> None:
     row += 1
 
     # Scrollable frame for skill tree
-    scrollable_attack_settings_frame = add_scrollable_frame(attack_settings_tab)
+    scrollable_skill_settings_frame = add_scrollable_frame(skill_settings_tab)
 
     # Configure columns
-    scrollable_attack_settings_frame.columnconfigure(0, weight=1)
-    scrollable_attack_settings_frame.columnconfigure(1, weight=1)
+    scrollable_skill_settings_frame.columnconfigure(0, weight=1)
+    scrollable_skill_settings_frame.columnconfigure(1, weight=1)
 
     # Skill tree frame with notebook
-    subclass_notebook = ttk.Notebook(scrollable_attack_settings_frame)
+    subclass_notebook = ttk.Notebook(scrollable_skill_settings_frame)
     subclass_notebook.grid(row=0, column=0, columnspan=2, sticky='nsew', padx=5, pady=5)
-    scrollable_attack_settings_frame.rowconfigure(0, weight=1)
-    scrollable_attack_settings_frame.columnconfigure(1, weight=1)
+    scrollable_skill_settings_frame.rowconfigure(0, weight=1)
+    scrollable_skill_settings_frame.columnconfigure(1, weight=1)
 
     def update_subclasses(*args) -> None:
         # Clean Old Widgets
