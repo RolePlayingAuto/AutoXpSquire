@@ -3,6 +3,7 @@ from pynput import keyboard
 import utils.shared as shared
 from utils.auto_attack import start_auto_attack, stop_auto_attack
 from utils.auto_buff import start_auto_buff, stop_auto_buff
+from utils.auto_heal import start_auto_heal, stop_auto_heal
 from utils.gui import create_gui
 from utils.hp_mp import start_hp_mp_check, stop_hp_mp_check
 from utils.loader import load_config
@@ -43,12 +44,16 @@ def stop_threads() -> None:
     if shared.buff_thread:
         stop_auto_buff(shared.buff_thread)
         shared.buff_thread = None
+    if shared.heal_thread:
+        stop_auto_heal(shared.heal_thread)
+        shared.heal_thread = None
 
 
 def start_threads() -> None:
     shared.auto_attack_thread = start_auto_attack(shared.config)
     shared.hp_mp_check_thread = start_hp_mp_check(shared.config)
     shared.buff_thread = start_auto_buff(shared.config)
+    shared.heal_thread = start_auto_heal(shared.config)
 
 
 if __name__ == "__main__":

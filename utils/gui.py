@@ -9,6 +9,7 @@ import pygetwindow as gw
 import utils.shared as shared
 from utils.auto_attack import start_auto_attack, stop_auto_attack
 from utils.auto_buff import start_auto_buff, stop_auto_buff
+from utils.auto_heal import start_auto_heal, stop_auto_heal
 from utils.hp_mp import start_hp_mp_check, stop_hp_mp_check
 from utils.loader import load_skill_data, write_config_to_file
 from utils.logger import get_logger
@@ -122,6 +123,8 @@ def create_gui() -> None:
             shared.hp_mp_check_thread = start_hp_mp_check(shared.config)
         if auto_buff_var.get():
             shared.buff_thread = start_auto_buff(shared.config)
+        if auto_heal_var.get():
+            shared.heal_thread = start_auto_heal(shared.config)
         logger.info("Bot started.")
 
     def stop_bot() -> None:
@@ -137,6 +140,10 @@ def create_gui() -> None:
             logger.info("auto_buff thread found, stopping auto_buff")
             stop_auto_buff(shared.buff_thread)
             shared.buff_thread = None
+        if shared.heal_thread:
+            logger.info("auto_heal thread found, stopping auto_heal")
+            stop_auto_heal(shared.heal_thread)
+            shared.heal_thread = None
         logger.info("Bot stopped")
 
     # Start and Stop buttons
@@ -623,7 +630,7 @@ def create_gui() -> None:
         tk.Label(header_frame, text="Cooldown (s)", font=("Arial", 10, "bold"), width=10).grid(row=0, column=3, padx=0)
         tk.Label(header_frame, text="Cast Time (ms)",
                  font=("Arial", 10, "bold"), width=12).grid(row=0, column=4, padx=0)
-        
+
         # For each heal, display the icon, name, "Party?" checkbox
         for heal in heals:
             heal_frame = tk.Frame(heal_settings_tab)
