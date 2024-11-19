@@ -89,6 +89,18 @@ def create_gui() -> None:
     auto_buff_checkbox.grid(row=row, column=0, columnspan=2, sticky='', padx=5, pady=5)
     row += 1
 
+    # Auto Heal checkbox
+    auto_heal_var = tk.BooleanVar()
+    auto_heal_checkbox = tk.Checkbutton(
+        control_frame,
+        text="Enable Auto Heal",
+        variable=auto_heal_var,
+        command=lambda: config_variable_setter(shared.config, auto_heal_var.get(), "auto_heal")
+    )
+    auto_heal_var.set(shared.config.get("auto_heal", False))
+    auto_heal_checkbox.grid(row=row, column=0, columnspan=2, sticky='', padx=5, pady=5)
+    row += 1
+
     def config_variable_setter(config: dict, variable: Any, variable_name: str) -> None:
         config[variable_name] = variable
         logger.info(f"Config value {variable_name} has been set to: {variable}")
@@ -556,6 +568,36 @@ def create_gui() -> None:
         # Add title label
         tk.Label(heal_settings_tab, text="Heal Settings", font=("Arial", 12, "bold")).pack(pady=10)
 
+        # Heal Threshold Entry at the top of the Heal Settings tab
+        threshold_frame = tk.Frame(heal_settings_tab)
+        threshold_frame.pack(fill='x', padx=10, pady=10)
+
+        # Label for Heal Threshold
+        tk.Label(threshold_frame, text="Heal Threshold (%):", font=("Arial", 10), anchor='e').grid(
+            row=0, column=0, padx=(10, 5), pady=5, sticky='e'
+        )
+
+        # Entry for Heal Threshold
+        heal_threshold_entry = tk.Entry(threshold_frame, width=10)
+        heal_threshold_entry.insert(0, str(shared.config.get("heal_threshold", 50)))
+        heal_threshold_entry.grid(row=0, column=1, padx=5, pady=5, sticky='ew')
+
+        def save_heal_threshold(event: tk.Event) -> None:
+            threshold_text = heal_threshold_entry.get().strip()
+            if threshold_text == '':
+                heal_threshold = 0  # Default to 0 if empty
+            else:
+                try:
+                    heal_threshold = int(threshold_text)
+                except ValueError:
+                    tk.messagebox.showerror("Error", "Heal Threshold must be a valid number.")
+                    return
+            shared.config["heal_threshold"] = heal_threshold
+
+        # Keep track of cooldown and cast time entries
+        heal_cooldown_entries = []
+        heal_cast_time_entries = []
+
         # Get the list of heals
         heals = [skill for skill in shared.config["attack_settings"].get("skills", []) if skill.get("heal")]
 
@@ -565,10 +607,33 @@ def create_gui() -> None:
                      font=("Arial", 12)).pack(pady=10)
             return
 
+        # Add headers
+        header_frame = tk.Frame(heal_settings_tab)
+        header_frame.pack(fill='x', padx=0, pady=5)
+
+        header_frame.columnconfigure(0, weight=0)  # Icon
+        header_frame.columnconfigure(1, weight=0)  # Skill Name
+        header_frame.columnconfigure(2, weight=0)  # Party?
+        header_frame.columnconfigure(3, weight=0)  # Cooldown
+        header_frame.columnconfigure(4, weight=0)  # Cast Time
+
+        tk.Label(header_frame, text="Icon", font=("Arial", 10, "bold"), width=10).grid(row=0, column=0, padx=0)
+        tk.Label(header_frame, text="Skill Name", font=("Arial", 10, "bold"), width=10).grid(row=0, column=1, padx=0)
+        tk.Label(header_frame, text="Party?", font=("Arial", 10, "bold"), width=10).grid(row=0, column=2, padx=0)
+        tk.Label(header_frame, text="Cooldown (s)", font=("Arial", 10, "bold"), width=10).grid(row=0, column=3, padx=0)
+        tk.Label(header_frame, text="Cast Time (ms)",
+                 font=("Arial", 10, "bold"), width=12).grid(row=0, column=4, padx=0)
+        
         # For each heal, display the icon, name, "Party?" checkbox
         for heal in heals:
             heal_frame = tk.Frame(heal_settings_tab)
             heal_frame.pack(fill='x', padx=5, pady=5)
+            # Configure heal columns
+            heal_frame.columnconfigure(0, weight=0)  # Icon
+            heal_frame.columnconfigure(1, weight=0)  # Skill Name
+            heal_frame.columnconfigure(2, weight=0)  # Party?
+            heal_frame.columnconfigure(3, weight=0)  # Cooldown
+            heal_frame.columnconfigure(4, weight=0)  # Cast Time
 
             # Icon
             skill_icon_path = f"static/{shared.config['attack_settings']['selected_class']
@@ -577,20 +642,21 @@ def create_gui() -> None:
                 skill_image = tk.PhotoImage(file=skill_icon_path)
                 skill_label = tk.Label(heal_frame, image=skill_image)
                 skill_label.image = skill_image  # type: ignore[attr-defined] # Keep a reference
-                skill_label.pack(side='left', padx=5)
+                skill_label.grid(row=0, column=0, padx=5)
             else:
                 # Placeholder if image not found
                 skill_label = tk.Label(heal_frame, text=heal['name'], font=("Arial", 10))
                 skill_label.pack(side='left', padx=5)
 
             # Name
-            tk.Label(heal_frame, text=heal['name'], font=("Arial", 10)).pack(side='left', padx=5)
+            tk.Label(heal_frame, text=heal['name'],
+                     font=("Arial", 10), width=15).grid(row=0, column=1, padx=5, sticky='w')
 
             # "Party?" checkbox
             party_var = tk.BooleanVar(value=heal.get('party', False))
             party_checkbox = tk.Checkbutton(heal_frame, text='Party?', variable=party_var)
 
-            def save_party_var(skill_name=heal['name'], party_var=party_var):
+            def save_party_var(skill_name=heal['name'], party_var=party_var) -> None:
                 # Update the skill in shared.config
                 for skill in shared.config["attack_settings"].get("skills", []):
                     if skill['name'] == skill_name:
@@ -599,7 +665,65 @@ def create_gui() -> None:
 
             party_var.trace_add("write", lambda *args, skill_name=heal['name'],
                                 party_var=party_var: save_party_var(skill_name, party_var))
-            party_checkbox.pack(side='left', padx=5)
+            party_checkbox.grid(row=0, column=2, padx=5)
+
+            # Cooldown Entry
+            cooldown_entry = tk.Entry(heal_frame, width=15)  # type: ignore[misc]
+            cooldown_entry.grid(row=0, column=3, padx=5)
+
+            cooldown_value = heal.get('cooldown', 0)  # Default to 0
+            cooldown_entry.insert(0, str(cooldown_value))
+
+            # Cast Time Entry
+            cast_time_entry = tk.Entry(heal_frame, width=15)
+            cast_time_entry.grid(row=0, column=4, padx=5)
+
+            # Get existing Cast Time value or default to 0
+            cast_time_value = heal.get('cast_time', 0)
+            cast_time_entry.insert(0, str(cast_time_value))
+
+            # Keep track of entries to update shared.config later
+            heal_cooldown_entries.append((heal['name'], cooldown_entry))
+            heal_cast_time_entries.append((heal['name'], cast_time_entry))
+
+            def save_cooldown(event: tk.Event, skill_name: str = heal['name'],
+                              cooldown_entry: tk.Entry = cooldown_entry) -> None:
+                cooldown_text = cooldown_entry.get().strip()
+                if cooldown_text == '':
+                    cooldown = 0
+                else:
+                    try:
+                        cooldown = int(cooldown_text)
+                    except ValueError:
+                        tk.messagebox.showerror("Error", f"Cooldown for {skill_name} must be a number.")
+                        return
+                # Update the skill in shared.config
+                for skill in shared.config["attack_settings"].get("skills", []):
+                    if skill['name'] == skill_name:
+                        skill['cooldown'] = cooldown
+                        break
+
+            # Function to save Cast Time
+            def save_cast_time(event: tk.Event, skill_name: str = heal['name'],
+                               cast_time_entry: tk.Entry = cast_time_entry) -> None:
+                cast_time_text = cast_time_entry.get().strip()
+                if cast_time_text == '':
+                    cast_time = 0
+                else:
+                    try:
+                        cast_time = int(cast_time_text)
+                    except ValueError:
+                        tk.messagebox.showerror("Error", f"Cast Time for {skill_name} must be a number.")
+                        return
+                # Update the skill in shared.config
+                for skill in shared.config["attack_settings"].get("skills", []):
+                    if skill['name'] == skill_name:
+                        skill['cast_time'] = cast_time
+                        break
+
+            heal_threshold_entry.bind("<FocusOut>", save_heal_threshold)
+            cooldown_entry.bind("<FocusOut>", save_cooldown)
+            cast_time_entry.bind("<FocusOut>", save_cast_time)
 
     # Skill Settings Tab
     tk.Label(skill_settings_tab, text="Skill Settings", font=("Arial", 12, "bold")).pack(pady=10)

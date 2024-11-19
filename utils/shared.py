@@ -8,11 +8,13 @@ from utils.loader import load_config
 auto_attack_thread: Optional[Thread] = None
 hp_mp_check_thread: Optional[Thread] = None
 buff_thread: Optional[Thread] = None
+heal_thread: Optional[Thread] = None
 
 # Thread stop events
 stop_auto_attack_event = Event()
 stop_hp_mp_event = Event()
 stop_auto_buff_event = Event()
+stop_auto_heal_event = Event()
 resume_attack_event = Event()
 
 config = load_config()

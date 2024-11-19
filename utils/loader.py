@@ -46,6 +46,8 @@ def load_config(config_file: str = "config/config.yml") -> dict:
             "mp_pot_key": mp_pot_key,
             "hp_mp_check": hp_mp_check,
             "auto_buff": auto_buff,
+            "auto_heal": config.get("auto_heal", False),
+            "heal_threshold": config.get("heal_threshold", 50),
             "auto_attack_toggle": auto_attack_toggle,
             "hp_bar_position": hp_bar_position,
             "mp_bar_position": mp_bar_position,
