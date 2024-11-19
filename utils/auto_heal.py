@@ -1,8 +1,8 @@
 import threading
 import time
+from typing import Tuple
 
 import pydirectinput
-from typing import Tuple
 
 import utils.shared as shared
 from utils.hp_mp import read_hp_mp
