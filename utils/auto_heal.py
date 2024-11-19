@@ -70,9 +70,8 @@ def heal_loop(config: dict) -> None:
 
 
 def heal_needed(heal_threshold: int, hp_bar_position: Tuple[int, int, int, int]) -> bool:
-    while not shared.stop_auto_heal_event.is_set():
-        hp_percentage, _ = read_hp_mp(hp_bar_position, hp_bar_position)
-        if hp_percentage is not None and hp_percentage <= heal_threshold:
-            return True
-        else:
-            return False
+    hp_percentage, _ = read_hp_mp(hp_bar_position, hp_bar_position)
+    if hp_percentage is not None and hp_percentage <= heal_threshold:
+        return True
+    else:
+        return False
