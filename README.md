@@ -10,7 +10,7 @@ Helper for your RPG fantasies to become the best Knight via Python
 
 ## Usage
 - Save Settings if you want any changes to be loaded in next start.
-- Put images in  `static/` folder with accordance to `config/skilldata_config.yml`and with `{class_name}_{skill_type}_{skill_name}.png` format. It would be better if you crop the images from your resolution for any image matching script uses.
+- Optionally put skill images in  `static/` folder with accordance to `config/skilldata_config.yml`and with `{class_name}_{skill_type}_{skill_name}.png` format. It would be better if you crop the images from your resolution for any image matching script uses.
 - Edit `config/skilldata_config.yml` to fit your game's classes and skills. Its there as an example template.
 
 ### Control 
@@ -45,4 +45,4 @@ Helper for your RPG fantasies to become the best Knight via Python
 - Set the cooldown and cast time for skills and `Save Settings`
 
 ## Disclaimer
-- This script is meant to use in SinglePlayer game or on your own servers. Don't use it to cheat on online games or break TOS.
+- This script is meant to use in a SinglePlayer game or on your own servers. Don't use it to cheat on online games or break TOS.
