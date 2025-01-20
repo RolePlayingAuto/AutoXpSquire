@@ -73,11 +73,11 @@ def check_hp_mp(hp_threshold: int, mp_threshold: int,
         hp_percentage, mp_percentage = read_hp_mp(hp_bar_position, mp_bar_position)
 
         if hp_percentage is not None and mp_percentage is not None:
-            if hp_percentage <= hp_threshold:
+            if hp_percentage <= hp_threshold and hp_threshold != 0:
                 logger.info(f"HP below threshold: {hp_percentage:.2f}%, using HP potion.")
                 use_potion(hp_pot_key)
 
-            if mp_percentage <= mp_threshold:
+            if mp_percentage <= mp_threshold and mp_threshold != 0:
                 logger.info(f"MP below threshold: {mp_percentage:.2f}%, using MP potion.")
                 use_potion(mp_pot_key)
         time.sleep(0.5)  # Reduced sleep time for faster response
