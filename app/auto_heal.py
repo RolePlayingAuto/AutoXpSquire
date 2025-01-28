@@ -4,8 +4,8 @@ from typing import Tuple
 
 import pydirectinput
 
-import utils.shared as shared
-from utils.hp_mp import read_hp_mp
+import app.shared as shared
+from app.hp_mp import read_hp_mp
 from utils.logger import get_logger
 
 logger = get_logger(__name__)

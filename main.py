@@ -1,11 +1,11 @@
 from pynput import keyboard
 
-import utils.shared as shared
-from utils.auto_attack import start_auto_attack, stop_auto_attack
-from utils.auto_buff import start_auto_buff, stop_auto_buff
-from utils.auto_heal import start_auto_heal, stop_auto_heal
-from utils.gui import create_gui
-from utils.hp_mp import start_hp_mp_check, stop_hp_mp_check
+import app.shared as shared
+from app.auto_attack import start_auto_attack, stop_auto_attack
+from app.auto_buff import start_auto_buff, stop_auto_buff
+from app.auto_heal import start_auto_heal, stop_auto_heal
+from app.gui import create_gui
+from app.hp_mp import start_hp_mp_check, stop_hp_mp_check
 from utils.loader import load_config
 from utils.logger import get_logger
 
