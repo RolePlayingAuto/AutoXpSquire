@@ -7,7 +7,7 @@ import numpy as np
 import pydirectinput
 from PIL import ImageGrab
 
-import utils.shared as shared
+import app.shared as shared
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
